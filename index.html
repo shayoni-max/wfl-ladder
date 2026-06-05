@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WFL Ladder S5</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #07080a;
+  --card:    #0d0f12;
+  --border:  #1a1d23;
+  --green:   #A3E635;
+  --text:    #f0f0f0;
+  --muted:   #6b7080;
+  --amber:   #FBBF24;
+  --red:     #F87171;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* Header */
+.hdr {
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.hdr-left { display: flex; align-items: center; gap: 10px; }
+.hdr-wfl  { font-size: 20px; font-weight: 900; color: var(--green); letter-spacing: -.02em; }
+.hdr-sep  { color: #333; }
+.hdr-title { font-size: 12px; font-weight: 600; color: #999; letter-spacing: .12em; text-transform: uppercase; }
+.hdr-ts   { font-size: 11px; color: var(--muted); }
+
+/* Layout */
+.wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 64px; }
+.section { margin-bottom: 40px; }
+.sec-title {
+  font-size: 10px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 14px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Points table ── */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl thead th {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+  padding: 6px 8px; text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.tbl thead th.left { text-align: left; }
+.tbl tbody tr { border-bottom: 1px solid var(--border); }
+.tbl tbody tr:last-child { border-bottom: none; }
+.tbl tbody tr:hover { background: #0e1015; }
+.tbl tbody td { padding: 11px 8px; text-align: center; font-size: 13px; }
+.tbl tbody td.left { text-align: left; }
+.tbl .pos  { color: var(--muted); font-size: 11px; width: 24px; }
+.tbl .club { display: flex; align-items: center; gap: 8px; }
+.tbl .pts  { font-weight: 800; color: var(--green); font-size: 15px; }
+.tbl .leader td:first-child { border-left: 3px solid var(--green); }
+.badge {
+  width: 26px; height: 26px; border-radius: 5px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 900; color: #07080a;
+}
+
+/* ── Fixtures ── */
+.blk {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.blk-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; cursor: pointer; user-select: none; gap: 12px;
+}
+.blk-hdr:hover { background: #0e1015; }
+.blk-name { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.blk-dates { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.blk-arrow { color: var(--muted); transition: transform .2s; }
+.blk.open .blk-arrow { transform: rotate(180deg); }
+.blk-body { display: none; border-top: 1px solid var(--border); }
+.blk.open .blk-body { display: block; }
+
+.match {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.match:last-child { border-bottom: none; }
+.match-home { display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
+.match-away { display: flex; align-items: center; gap: 7px; }
+.match-name { font-size: 13px; font-weight: 600; }
+.match-home .match-name { text-align: right; }
+
+.score {
+  display: flex; align-items: center; gap: 5px;
+  background: #13161c; border: 1px solid var(--border);
+  border-radius: 7px; padding: 7px 12px;
+  min-width: 68px; justify-content: center;
+}
+.score.played { background: rgba(163,230,53,.07); border-color: rgba(163,230,53,.18); }
+.score-n { font-size: 16px; font-weight: 800; line-height: 1; }
+.score.played .score-n { color: var(--green); }
+.score-dash { color: var(--muted); font-size: 11px; }
+.score-vs { font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+
+/* status chips */
+.chip {
+  font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  border-radius: 4px; padding: 2px 7px;
+}
+.chip.done   { background: rgba(163,230,53,.12); color: var(--green); }
+.chip.active { background: rgba(251,191,36,.12); color: var(--amber); }
+
+/* loading / error */
+.msg { text-align: center; padding: 52px 20px; color: var(--muted); }
+.msg.err { color: var(--red); }
+
+/* footer */
+.foot {
+  text-align: center; font-size: 11px; color: var(--muted);
+  padding: 20px; border-top: 1px solid var(--border);
+}
+.foot a { color: var(--green); text-decoration: none; }
+
+/* responsive */
+@media (max-width: 500px) {
+  .hide-sm { display: none; }
+  .match-name { font-size: 12px; }
+  .badge { width: 22px; height: 22px; font-size: 8px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-left">
+    <span class="hdr-wfl">WFL</span>
+    <span class="hdr-sep">·</span>
+    <span class="hdr-title">Ladder Season 5</span>
+  </div>
+  <span class="hdr-ts" id="ts"></span>
+</header>
+
+<main class="wrap">
+  <div id="app"><div class="msg">Loading…</div></div>
+</main>
+
+<footer class="foot">
+  WFL — Football Built For Women &nbsp;·&nbsp; Delhi &nbsp;·&nbsp;
+  <a href="https://wflfooty.com">wflfooty.com</a>
+</footer>
+
+<script>
+// Team colours — keyed on a substring of the team name (lowercase)
+const COLORS = {
+  tribal:   '#3B82F6',
+  fairy:    '#22C55E',
+  ooo:      '#F59E0B',
+  kkm:      '#EF4444',
+  waddlers: '#A78BFA',
+  lioness:  '#EC4899',
+};
+
+function color(name) {
+  const n = (name || '').toLowerCase();
+  for (const [k, v] of Object.entries(COLORS)) if (n.includes(k)) return v;
+  return '#6b7080';
+}
+
+function abbr(name) {
+  const words = name.trim().split(/\s+/).filter(w => w.length > 2);
+  return (words[0] || name).slice(0, 3).toUpperCase();
+}
+
+function fmtDate(raw) {
+  if (!raw) return '';
+  // Handles "8-Jun-2026" or "2026-06-08"
+  try {
+    const d = raw.match(/^\d{4}-/)
+      ? new Date(raw)
+      : new Date(raw.replace(/^(\d+)-([A-Za-z]+)-(\d{4})$/, '$2 $1, $3'));
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  } catch { return raw; }
+}
+
+function standings(data) {
+  if (!data.length) return '<p class="msg">No standings yet — season starts 8 Jun.</p>';
+  const rows = data.map((s, i) => `
+    <tr class="${i === 0 ? 'leader' : ''}">
+      <td class="pos">${i + 1}</td>
+      <td class="left">
+        <div class="club">
+          <div class="badge" style="background:${color(s.name)}">${abbr(s.name)}</div>
+          <span>${s.name}</span>
+        </div>
+      </td>
+      <td>${s.p}</td>
+      <td>${s.w}</td>
+      <td>${s.d}</td>
+      <td>${s.l}</td>
+      <td class="hide-sm">${s.gf}</td>
+      <td class="hide-sm">${s.ga}</td>
+      <td class="hide-sm">${s.gd > 0 ? '+' + s.gd : s.gd}</td>
+      <td class="pts">${s.pts}</td>
+    </tr>`).join('');
+  return `<table class="tbl">
+    <thead><tr>
+      <th>#</th><th class="left">Club</th>
+      <th>MP</th><th>W</th><th>D</th><th>L</th>
+      <th class="hide-sm">GF</th><th class="hide-sm">GA</th><th class="hide-sm">GD</th>
+      <th>Pts</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function fixtures(blocks) {
+  if (!blocks.length) return '<p class="msg">No fixtures loaded yet.</p>';
+
+  // Auto-open the first block that has an unplayed match
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  let openIdx = blocks.length - 1;
+  for (let i = 0; i < blocks.length; i++) {
+    const hasUnplayed = blocks[i].matches.some(m => m.hs === null);
+    if (hasUnplayed) { openIdx = i; break; }
+  }
+
+  return blocks.map((b, idx) => {
+    const played  = b.matches.filter(m => m.hs !== null).length;
+    const total   = b.matches.length;
+    const allDone = played === total && total > 0;
+    const partial = played > 0 && !allDone;
+    const chip    = allDone
+      ? `<span class="chip done">Complete</span>`
+      : partial
+        ? `<span class="chip active">${played}/${total}</span>`
+        : '';
+
+    const matchRows = b.matches.map(m => {
+      const played = m.hs !== null && m.as !== null;
+      const scoreEl = played
+        ? `<div class="score played">
+             <span class="score-n">${m.hs}</span>
+             <span class="score-dash">–</span>
+             <span class="score-n">${m.as}</span>
+           </div>`
+        : `<div class="score"><span class="score-vs">vs</span></div>`;
+      return `<div class="match">
+        <div class="match-home">
+          <span class="match-name">${m.home}</span>
+          <div class="badge" style="background:${color(m.home)}">${abbr(m.home)}</div>
+        </div>
+        ${scoreEl}
+        <div class="match-away">
+          <div class="badge" style="background:${color(m.away)}">${abbr(m.away)}</div>
+          <span class="match-name">${m.away}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    const dateStr = b.start && b.end ? `${fmtDate(b.start)} – ${fmtDate(b.end)}` : '';
+    return `<div class="blk${idx === openIdx ? ' open' : ''}" onclick="toggle(this)">
+      <div class="blk-hdr">
+        <div>
+          <div class="blk-name">${b.label} ${chip}</div>
+          ${dateStr ? `<div class="blk-dates">${dateStr}</div>` : ''}
+        </div>
+        <span class="blk-arrow">▾</span>
+      </div>
+      <div class="blk-body">${matchRows}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggle(el) { el.classList.toggle('open'); }
+
+async function load() {
+  try {
+    const res  = await fetch('/api/ladder');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    if (data.updated) {
+      const t = new Date(data.updated);
+      document.getElementById('ts').textContent =
+        'Updated ' + t.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    document.getElementById('app').innerHTML = `
+      <div class="section">
+        <div class="sec-title">Points Table</div>
+        ${standings(data.standings)}
+      </div>
+      <div class="section">
+        <div class="sec-title">Fixtures &amp; Results</div>
+        ${fixtures(data.blocks)}
+      </div>`;
+  } catch (e) {
+    document.getElementById('app').innerHTML =
+      `<div class="msg err">Couldn't load data: ${e.message}</div>`;
+  }
+}
+
+load();
+setInterval(load, 60_000);
+</script>
+</body>
+</html>

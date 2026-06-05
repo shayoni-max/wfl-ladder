@@ -1,0 +1,95 @@
+const SHEET_ID = process.env.SHEET_ID;
+const API_KEY  = process.env.SHEETS_API_KEY;
+const BASE     = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+async function batchGet(ranges) {
+  const params = new URLSearchParams({ key: API_KEY });
+  ranges.forEach(r => params.append('ranges', r));
+  const res = await fetch(`${BASE}/${SHEET_ID}/values:batchGet?${params}`);
+  if (!res.ok) throw new Error(`Sheets API ${res.status}`);
+  const json = await res.json();
+  const out = {};
+  for (const vr of json.valueRanges || []) {
+    const sheet = vr.range.split('!')[0].replace(/'/g, '');
+    out[sheet] = vr.values || [];
+  }
+  return out;
+}
+
+function norm(s) {
+  return (s || '').toLowerCase().replace(/\bfc\b/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function num(v) {
+  const n = parseInt(v);
+  return isNaN(n) ? null : n;
+}
+
+export default async function handler(req, res) {
+  try {
+    const data = await batchGet([
+      'Fixtures_Revised!A1:G60',
+      'Points Table!A1:N35',
+    ]);
+
+    // Standings — rows 3-8 in the sheet (index 2-7)
+    const ptRows = data['Points Table'] || [];
+    const standings = [];
+    for (let i = 2; i <= 7; i++) {
+      const r = ptRows[i];
+      if (!r || !r[1]?.trim()) continue;
+      standings.push({
+        name: r[1].trim(),
+        p:   num(r[4])  ?? 0,
+        w:   num(r[5])  ?? 0,
+        d:   num(r[6])  ?? 0,
+        l:   num(r[7])  ?? 0,
+        gf:  num(r[8])  ?? 0,
+        ga:  num(r[9])  ?? 0,
+        gd:  num(r[10]) ?? 0,
+        pts: num(r[13]) ?? 0,
+      });
+    }
+    standings.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+
+    // Score lookup from Points Table match rows
+    const scoreMap = {};
+    for (const r of ptRows) {
+      if (!r?.[0] || isNaN(parseInt(r[0]))) continue;
+      const hs = num(r[3]);
+      const as = num(r[4]);
+      if (hs === null || as === null) continue;
+      scoreMap[`${norm(r[2])}|${norm(r[5])}`] = { hs, as };
+    }
+
+    // Fixtures grouped by block
+    const blocks = {};
+    for (const r of (data['Fixtures_Revised'] || []).slice(1)) {
+      if (!r?.[0] || isNaN(parseInt(r[0]))) continue;
+      const home  = (r[1] || '').trim();
+      const away  = (r[3] || '').trim();
+      const block = (r[4] || '').trim();
+      if (!home || !away || !block) continue;
+      const score = scoreMap[`${norm(home)}|${norm(away)}`] ?? null;
+      if (!blocks[block]) blocks[block] = {
+        label: block,
+        start: (r[5] || '').trim(),
+        end:   (r[6] || '').trim(),
+        matches: [],
+      };
+      blocks[block].matches.push({
+        no: parseInt(r[0]),
+        home, away,
+        hs: score?.hs ?? null,
+        as: score?.as ?? null,
+      });
+    }
+
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.json({ standings, blocks: Object.values(blocks), updated: new Date().toISOString() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+}
