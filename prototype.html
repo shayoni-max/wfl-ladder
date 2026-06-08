@@ -187,9 +187,8 @@ a { color: inherit; }
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="showTab('standings')">Table</button>
   <button class="tab-btn" onclick="showTab('fixtures')">Fixtures</button>
-  <button class="tab-btn" onclick="showTab('predict')">Predict</button>
-  <button class="tab-btn" onclick="showTab('vote')">Vote</button>
-  <button class="tab-btn" onclick="showTab('leaderboard')">Leaderboard</button>
+  <button class="tab-btn" onclick="showTab('predictvote')">Predict &amp; Vote</button>
+  <button class="tab-btn" onclick="showTab('leaderboard')">Fan Leaderboard</button>
 </nav>
 
 <main class="wrap">
@@ -230,8 +229,8 @@ a { color: inherit; }
     <div id="fixtures-body"></div>
   </div>
 
-  <!-- ══ PREDICT ══ -->
-  <div id="tab-predict" class="tab-content">
+  <!-- ══ PREDICT & VOTE ══ -->
+  <div id="tab-predictvote" class="tab-content">
 
     <!-- State A: Not registered -->
     <div id="predict-register">
@@ -418,10 +417,62 @@ a { color: inherit; }
         </div>
       </div>
     </div>
+
+    <!-- ── Vote section ── -->
+    <div style="margin-top:36px;">
+      <div class="sec-title">Goal of the Block — Cast Your Vote</div>
+      <div class="poll-card">
+        <div class="poll-title">⚽ Best Goal · Block 1</div>
+        <div class="poll-meta">312 votes · Closes 17 Jun 2026</div>
+        <div class="poll-videos">
+          <div class="video-card" id="vid-1">
+            <div class="video-thumb" style="background:linear-gradient(135deg,#1a1d23,#0d0f12);">
+              <div class="play-btn">▶</div>
+            </div>
+            <div class="video-info">
+              <div class="video-title">Disha — Long-range screamer</div>
+              <div class="video-meta">Lionesses FC · Match 1</div>
+              <div class="vote-bar"><div class="vote-bar-fill" style="width:52%"></div></div>
+              <div class="vote-count">163 votes · 52%</div>
+              <button class="vote-btn" onclick="castVote('vid-1')">Vote for this goal</button>
+            </div>
+          </div>
+          <div class="video-card" id="vid-2">
+            <div class="video-thumb" style="background:linear-gradient(135deg,#0f1a0a,#0d0f12);">
+              <div class="play-btn">▶</div>
+            </div>
+            <div class="video-info">
+              <div class="video-title">Aliya — Header from the corner</div>
+              <div class="video-meta">Fairy Fari Foundation · Match 2</div>
+              <div class="vote-bar"><div class="vote-bar-fill" style="width:30%"></div></div>
+              <div class="vote-count">94 votes · 30%</div>
+              <button class="vote-btn" onclick="castVote('vid-2')">Vote for this goal</button>
+            </div>
+          </div>
+          <div class="video-card" id="vid-3">
+            <div class="video-thumb" style="background:linear-gradient(135deg,#1a100a,#0d0f12);">
+              <div class="play-btn">▶</div>
+            </div>
+            <div class="video-info">
+              <div class="video-title">Moz — Solo run and finish</div>
+              <div class="video-meta">WADDLERS FC · Match 2</div>
+              <div class="vote-bar"><div class="vote-bar-fill" style="width:18%"></div></div>
+              <div class="vote-count">55 votes · 18%</div>
+              <button class="vote-btn" onclick="castVote('vid-3')">Vote for this goal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sec-title" style="margin-top:8px;">Previous Polls</div>
+      <div class="poll-card" style="opacity:.6;">
+        <div class="poll-title" style="font-size:15px;">Goal of the Pre-Season</div>
+        <div class="poll-meta">Closed · Winner: Saanvi — Long-range effort (Tribal Football) · 284 votes</div>
+      </div>
+    </div>
   </div>
 
-  <!-- ══ VOTE ══ -->
-  <div id="tab-vote" class="tab-content">
+  <!-- Vote section merged into predict tab below -->
+  <div id="tab-vote-hidden" style="display:none;">
     <div class="sec-title">Goal of the Block</div>
 
     <!-- Active poll -->
@@ -583,6 +634,7 @@ function registerFan() {
   if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
   document.getElementById('predict-register').style.display = 'none';
   document.getElementById('predict-form').style.display = 'block';
+  window.fanName = name;
   document.getElementById('fan-name-display').textContent = `Hey, ${name.split(' ')[0]}! 👋`;
 }
 
@@ -700,13 +752,23 @@ BLOCKS.forEach((b,i) => {
   const played = b.matches.filter(m=>m.hs!=null).length;
   const chip = played===b.matches.length ? '<span class="chip done">Complete</span>' : played>0 ? `<span class="chip active">${played}/${b.matches.length}</span>` : '';
   const rows = b.matches.map(m => {
-    const s = m.hs!=null
+    const played = m.hs != null;
+    const statusPill = played
+      ? `<span style="font-size:10px;font-weight:700;background:rgba(163,230,53,.12);color:var(--green);border-radius:4px;padding:2px 8px;letter-spacing:.04em;">COMPLETED</span>`
+      : `<span style="font-size:10px;font-weight:700;background:rgba(96,165,250,.1);color:#60A5FA;border-radius:4px;padding:2px 8px;letter-spacing:.04em;">UPCOMING</span>`;
+    const scoreEl = played
       ? `<div class="score played"><span class="score-n">${m.hs}</span><span class="score-dash">–</span><span class="score-n">${m.as}</span></div>`
       : `<div class="score"><span class="score-vs">vs</span></div>`;
-    return `<div class="match-row">
-      <div class="match-home"><span class="match-name">${m.h}</span><div class="badge" style="background:${teamColor(m.h)}">${abbr(m.h)}</div></div>
-      ${s}
-      <div class="match-away"><div class="badge" style="background:${teamColor(m.a)}">${abbr(m.a)}</div><span class="match-name">${m.a}</span></div>
+    return `<div style="border-bottom:1px solid var(--border);last-child:no-border;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0;gap:8px;">
+        <span style="font-size:11px;color:var(--muted);">Match ${m.no}</span>
+        ${statusPill}
+      </div>
+      <div class="match-row" style="border-bottom:none;">
+        <div class="match-home"><span class="match-name">${m.h}</span><div class="badge" style="background:${teamColor(m.h)}">${abbr(m.h)}</div></div>
+        ${scoreEl}
+        <div class="match-away"><div class="badge" style="background:${teamColor(m.a)}">${abbr(m.a)}</div><span class="match-name">${m.a}</span></div>
+      </div>
     </div>`;
   }).join('');
   fb.innerHTML += `<div class="blk${i===0?' open':''}">
