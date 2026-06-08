@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WFL Fan Hub — Design Prototype</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #07080a; --card: #0d0f12; --card2: #111418;
+  --border: #1a1d23; --border2: #252a32;
+  --green: #A3E635; --green-dk: #65A30D;
+  --text: #f0f0f0; --muted: #6b7080; --muted2: #9ba3af;
+  --amber: #FBBF24; --red: #F87171; --purple: #A78BFA; --blue: #60A5FA;
+}
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; }
+
+/* ── Header ── */
+.hdr { border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.hdr-left { display: flex; align-items: center; gap: 10px; }
+.hdr-wfl { font-size: 20px; font-weight: 900; color: var(--green); letter-spacing: -.02em; }
+.hdr-sep { color: #333; }
+.hdr-title { font-size: 12px; font-weight: 600; color: #999; letter-spacing: .12em; text-transform: uppercase; }
+.proto-badge { background: rgba(251,191,36,.15); color: var(--amber); font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(251,191,36,.3); }
+
+/* ── Tab nav ── */
+.tab-nav { display: flex; gap: 2px; padding: 12px 20px 0; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tab-btn { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer; white-space: nowrap; margin-bottom: -1px; transition: color .15s; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+
+/* ── Layout ── */
+.wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 80px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Section titles ── */
+.sec-title { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+/* ── Standings table ── */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl thead th { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--border); }
+.tbl thead th.left { text-align: left; }
+.tbl tbody tr { border-bottom: 1px solid var(--border); }
+.tbl tbody tr:last-child { border-bottom: none; }
+.tbl tbody tr:hover { background: #0e1015; }
+.tbl tbody td { padding: 11px 8px; text-align: center; font-size: 13px; }
+.tbl tbody td.left { text-align: left; }
+.badge { width: 26px; height: 26px; border-radius: 5px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; color: #07080a; }
+.club-cell { display: flex; align-items: center; gap: 8px; }
+.pts-col { font-weight: 800; color: var(--green); font-size: 15px; }
+.leader-row td:first-child { border-left: 3px solid var(--green); }
+
+/* ── Fixture blocks ── */
+.blk { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+.blk-hdr { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; cursor: pointer; gap: 12px; }
+.blk-hdr:hover { background: #0e1015; }
+.blk-name { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.blk-dates { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.blk-body { border-top: 1px solid var(--border); }
+.match-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+.match-row:last-child { border-bottom: none; }
+.match-home { display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
+.match-away { display: flex; align-items: center; gap: 7px; }
+.match-name { font-size: 13px; font-weight: 600; }
+.match-home .match-name { text-align: right; }
+.score { display: flex; align-items: center; gap: 5px; background: #13161c; border: 1px solid var(--border); border-radius: 7px; padding: 7px 12px; min-width: 68px; justify-content: center; }
+.score.played { background: rgba(163,230,53,.07); border-color: rgba(163,230,53,.18); }
+.score-n { font-size: 16px; font-weight: 800; line-height: 1; }
+.score.played .score-n { color: var(--green); }
+.score-dash { color: var(--muted); font-size: 11px; }
+.score-vs { font-size: 11px; color: var(--muted); }
+
+/* ── Fan registration ── */
+.fan-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; max-width: 440px; margin: 0 auto 32px; text-align: center; }
+.fan-card h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.fan-card p { font-size: 13px; color: var(--muted2); margin-bottom: 24px; line-height: 1.6; }
+.field { text-align: left; margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.field input { width: 100%; background: #13161c; border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; transition: border-color .15s; }
+.field input:focus { border-color: var(--green); }
+.btn-green { width: 100%; background: var(--green); color: #07080a; border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: opacity .15s; margin-top: 4px; }
+.btn-green:hover { opacity: .9; }
+.fan-greeting { background: rgba(163,230,53,.06); border: 1px solid rgba(163,230,53,.2); border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.fan-greeting-left { display: flex; flex-direction: column; }
+.fan-greeting-name { font-size: 15px; font-weight: 700; }
+.fan-greeting-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.fan-pts { font-size: 22px; font-weight: 900; color: var(--green); }
+.fan-pts-lbl { font-size: 10px; color: var(--muted); text-align: right; margin-top: 2px; letter-spacing: .06em; text-transform: uppercase; }
+
+/* ── Prediction form ── */
+.predict-block-title { font-size: 13px; font-weight: 700; color: var(--muted2); margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
+.predict-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.predict-matchup { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); }
+.pred-team { font-size: 13px; font-weight: 700; }
+.pred-home { text-align: right; }
+.pred-vs { font-size: 11px; color: var(--muted); text-align: center; }
+.predict-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.pred-section-lbl { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.winner-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.winner-opt { flex: 1; min-width: 80px; }
+.winner-opt input[type=radio] { display: none; }
+.winner-opt label { display: block; text-align: center; padding: 8px 6px; background: #13161c; border: 1px solid var(--border2); border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.winner-opt input:checked + label { background: rgba(163,230,53,.1); border-color: var(--green); color: var(--green); }
+.winner-opt label:hover { border-color: var(--border2); background: #181c22; }
+.score-inputs { display: flex; align-items: center; gap: 10px; }
+.score-inputs input[type=number] { width: 60px; text-align: center; background: #13161c; border: 1px solid var(--border2); border-radius: 7px; padding: 8px; color: var(--text); font-size: 18px; font-weight: 800; outline: none; }
+.score-inputs input[type=number]:focus { border-color: var(--green); }
+.score-inputs span { color: var(--muted); font-size: 14px; font-weight: 700; }
+.score-team-labels { display: flex; gap: 10px; align-items: center; }
+.score-team-lbl { width: 60px; text-align: center; font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
+.score-team-spacer { flex: 1; }
+.submit-row { display: flex; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid var(--border); }
+.btn-submit { background: var(--green); color: #07080a; border: none; border-radius: 7px; padding: 9px 20px; font-size: 13px; font-weight: 800; cursor: pointer; }
+.btn-submit:hover { opacity: .9; }
+.pred-saved { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--green); font-weight: 600; }
+.pred-locked { font-size: 12px; color: var(--amber); background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.2); border-radius: 6px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px; }
+
+/* ── Vote tab ── */
+.poll-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+.poll-title { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+.poll-meta { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+.poll-videos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.video-card { background: #13161c; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color .15s; }
+.video-card:hover { border-color: var(--border2); }
+.video-card.voted { border-color: var(--green); }
+.video-thumb { position: relative; background: #0a0c10; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.video-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.play-btn { position: absolute; width: 44px; height: 44px; background: rgba(0,0,0,.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.video-info { padding: 12px; }
+.video-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.video-meta { font-size: 11px; color: var(--muted); }
+.vote-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.vote-bar-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .4s; }
+.vote-count { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.vote-btn { width: 100%; margin-top: 10px; background: none; border: 1px solid var(--border2); border-radius: 7px; padding: 8px; font-size: 12px; font-weight: 700; color: var(--text); cursor: pointer; transition: all .15s; }
+.vote-btn:hover { border-color: var(--green); color: var(--green); }
+.vote-btn.selected { background: rgba(163,230,53,.1); border-color: var(--green); color: var(--green); }
+.poll-voted-note { font-size: 12px; color: var(--green); font-weight: 600; margin-top: 16px; text-align: center; }
+.no-poll { text-align: center; padding: 60px 20px; color: var(--muted); }
+.no-poll .icon { font-size: 32px; margin-bottom: 12px; }
+.no-poll h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+
+/* ── Leaderboard ── */
+.lb-row { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.lb-row:last-child { border-bottom: none; }
+.lb-row.me { background: rgba(163,230,53,.04); }
+.lb-pos { font-size: 13px; font-weight: 800; color: var(--muted); text-align: center; }
+.lb-pos.gold   { color: #FBBF24; }
+.lb-pos.silver { color: #CBD5E1; }
+.lb-pos.bronze { color: #C8855C; }
+.lb-name { font-size: 14px; font-weight: 600; }
+.lb-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.lb-pts  { font-size: 18px; font-weight: 900; color: var(--green); }
+.lb-pts-lbl { font-size: 10px; color: var(--muted); text-align: right; }
+.me-tag { font-size: 10px; font-weight: 700; background: rgba(163,230,53,.15); color: var(--green); border-radius: 4px; padding: 2px 6px; margin-left: 6px; }
+.lb-empty { text-align: center; padding: 48px 20px; color: var(--muted); font-style: italic; }
+
+/* ── Chips ── */
+.chip { font-size: 10px; font-weight: 700; letter-spacing: .06em; border-radius: 4px; padding: 2px 7px; }
+.chip.done   { background: rgba(163,230,53,.12); color: var(--green); }
+.chip.active { background: rgba(251,191,36,.12); color: var(--amber); }
+.chip.live   { background: rgba(239,68,68,.18); color: var(--red); }
+
+/* ── Misc ── */
+.msg  { text-align: center; padding: 52px 20px; color: var(--muted); }
+.foot { text-align: center; font-size: 11px; color: var(--muted); padding: 20px; border-top: 1px solid var(--border); }
+.foot a { color: var(--green); text-decoration: none; }
+a { color: inherit; }
+@media (max-width: 500px) {
+  .hide-sm { display: none; }
+  .poll-videos { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-left">
+    <span class="hdr-wfl">WFL</span>
+    <span class="hdr-sep">·</span>
+    <span class="hdr-title">Ladder Season 1</span>
+  </div>
+  <span class="proto-badge">DESIGN PROTOTYPE</span>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('standings')">Table</button>
+  <button class="tab-btn" onclick="showTab('fixtures')">Fixtures</button>
+  <button class="tab-btn" onclick="showTab('predict')">Predict</button>
+  <button class="tab-btn" onclick="showTab('vote')">Vote</button>
+  <button class="tab-btn" onclick="showTab('leaderboard')">Leaderboard</button>
+</nav>
+
+<main class="wrap">
+
+  <!-- ══ STANDINGS ══ -->
+  <div id="tab-standings" class="tab-content active">
+    <div class="sec-title">Points Table</div>
+    <table class="tbl">
+      <thead><tr>
+        <th>#</th><th class="left">Club</th>
+        <th>MP</th><th>W</th><th>D</th><th>L</th>
+        <th class="hide-sm">GF</th><th class="hide-sm">GA</th><th class="hide-sm">GD</th>
+        <th>Pts</th>
+      </tr></thead>
+      <tbody id="standings-body"></tbody>
+    </table>
+  </div>
+
+  <!-- ══ FIXTURES ══ -->
+  <div id="tab-fixtures" class="tab-content">
+    <div class="sec-title">Fixtures &amp; Results</div>
+    <div id="fixtures-body"></div>
+  </div>
+
+  <!-- ══ PREDICT ══ -->
+  <div id="tab-predict" class="tab-content">
+
+    <!-- State A: Not registered -->
+    <div id="predict-register">
+      <div class="fan-card">
+        <div style="font-size:32px;margin-bottom:12px;">⚽</div>
+        <h2>Join the Fan Challenge</h2>
+        <p>Predict match outcomes, score exact results, and climb the leaderboard. Top fans win prizes at the end of the season.</p>
+        <div class="field">
+          <label>Your Name</label>
+          <input type="text" placeholder="e.g. Priya Sharma" id="reg-name">
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" placeholder="+91 98765 43210" id="reg-phone">
+        </div>
+        <button class="btn-green" onclick="registerFan()">Join Now — It's Free</button>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;">Your phone number is only used to identify you on the leaderboard.</p>
+      </div>
+    </div>
+
+    <!-- State B: Registered, predictions open -->
+    <div id="predict-form" style="display:none;">
+      <div class="fan-greeting">
+        <div class="fan-greeting-left">
+          <span class="fan-greeting-name" id="fan-name-display">Hey, Priya! 👋</span>
+          <span class="fan-greeting-sub">Block 1 predictions are open</span>
+        </div>
+        <div style="text-align:right;">
+          <div class="fan-pts" id="fan-pts-display">12</div>
+          <div class="fan-pts-lbl">points</div>
+        </div>
+      </div>
+
+      <div class="predict-block-title">
+        <span style="background:rgba(163,230,53,.12);color:var(--green);border-radius:5px;padding:3px 8px;font-size:11px;">Block 1</span>
+        8 Jun – 17 Jun · Predictions close at kickoff
+      </div>
+
+      <!-- Match 1 — open -->
+      <div class="predict-card">
+        <div class="predict-matchup">
+          <div style="text-align:right;">
+            <div class="pred-team pred-home">Lionesses FC</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Home</div>
+          </div>
+          <div class="pred-vs">vs</div>
+          <div>
+            <div class="pred-team">Fairy Fari Foundation</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Away</div>
+          </div>
+        </div>
+        <div class="predict-body">
+          <div>
+            <div class="pred-section-lbl">Who wins?</div>
+            <div class="winner-options">
+              <div class="winner-opt">
+                <input type="radio" name="winner-1" id="w1-home" value="home">
+                <label for="w1-home">Lionesses FC</label>
+              </div>
+              <div class="winner-opt">
+                <input type="radio" name="winner-1" id="w1-draw" value="draw">
+                <label for="w1-draw">Draw</label>
+              </div>
+              <div class="winner-opt">
+                <input type="radio" name="winner-1" id="w1-away" value="away">
+                <label for="w1-away">Fairy Fari</label>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="pred-section-lbl">Predict the score</div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div class="score-team-labels">
+                <span class="score-team-lbl">LIO</span>
+                <span class="score-team-spacer"></span>
+                <span class="score-team-lbl">FFF</span>
+              </div>
+              <div class="score-inputs">
+                <input type="number" min="0" max="20" value="2" id="s1-home">
+                <span>–</span>
+                <input type="number" min="0" max="20" value="1" id="s1-away">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="submit-row">
+          <button class="btn-submit" onclick="savePrediction(1, this)">Save prediction</button>
+        </div>
+      </div>
+
+      <!-- Match 2 — saved -->
+      <div class="predict-card">
+        <div class="predict-matchup">
+          <div style="text-align:right;">
+            <div class="pred-team pred-home">Fairy Fari Foundation</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Home</div>
+          </div>
+          <div class="pred-vs">vs</div>
+          <div>
+            <div class="pred-team">WADDLERS FC</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Away</div>
+          </div>
+        </div>
+        <div class="predict-body">
+          <div>
+            <div class="pred-section-lbl">Who wins?</div>
+            <div class="winner-options">
+              <div class="winner-opt">
+                <input type="radio" name="winner-2" id="w2-home" value="home" checked>
+                <label for="w2-home">Fairy Fari</label>
+              </div>
+              <div class="winner-opt">
+                <input type="radio" name="winner-2" id="w2-draw" value="draw">
+                <label for="w2-draw">Draw</label>
+              </div>
+              <div class="winner-opt">
+                <input type="radio" name="winner-2" id="w2-away" value="away">
+                <label for="w2-away">WADDLERS</label>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="pred-section-lbl">Predict the score</div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div class="score-team-labels">
+                <span class="score-team-lbl">FFF</span>
+                <span class="score-team-spacer"></span>
+                <span class="score-team-lbl">WAD</span>
+              </div>
+              <div class="score-inputs">
+                <input type="number" min="0" max="20" value="2" id="s2-home">
+                <span>–</span>
+                <input type="number" min="0" max="20" value="0" id="s2-away">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="submit-row" style="justify-content:space-between;align-items:center;">
+          <span class="pred-saved">✓ Saved</span>
+          <button class="btn-submit" onclick="savePrediction(2, this)">Update</button>
+        </div>
+      </div>
+
+      <!-- Match 3 — locked (past deadline) -->
+      <div class="predict-card" style="opacity:.7;">
+        <div class="predict-matchup">
+          <div style="text-align:right;">
+            <div class="pred-team pred-home">OOO FC</div>
+          </div>
+          <div class="pred-vs">vs</div>
+          <div><div class="pred-team">KKM</div></div>
+        </div>
+        <div class="predict-body">
+          <span class="pred-locked">🔒 Predictions locked — match in progress</span>
+        </div>
+      </div>
+
+      <!-- Points breakdown (after results) -->
+      <div style="margin-top:28px;">
+        <div class="sec-title">Your results — Block 1</div>
+        <div class="predict-card" style="padding:0;">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Lionesses FC vs Fairy Fari Foundation</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Your prediction: Lionesses 2–1</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:var(--muted);">Result: 3–1</div>
+              <div style="font-size:14px;font-weight:800;color:var(--green);margin-top:2px;">+2 pts</div>
+              <div style="font-size:10px;color:var(--muted);">Correct winner</div>
+            </div>
+          </div>
+          <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Fairy Fari vs WADDLERS</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">Your prediction: FFF 2–0</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:var(--muted);">Result: 2–0</div>
+              <div style="font-size:14px;font-weight:800;color:var(--green);margin-top:2px;">+5 pts</div>
+              <div style="font-size:10px;color:var(--muted);">Exact score!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VOTE ══ -->
+  <div id="tab-vote" class="tab-content">
+    <div class="sec-title">Goal of the Block</div>
+
+    <!-- Active poll -->
+    <div class="poll-card">
+      <div class="poll-title">⚽ Goal of Block 1 — Vote for your favourite</div>
+      <div class="poll-meta">Block 1 · 312 votes · Closes 17 Jun</div>
+      <div class="poll-videos">
+
+        <div class="video-card" id="vid-1">
+          <div class="video-thumb" style="background:linear-gradient(135deg,#1a1d23,#0d0f12);">
+            <div class="play-btn">▶</div>
+          </div>
+          <div class="video-info">
+            <div class="video-title">Disha — Long-range screamer</div>
+            <div class="video-meta">Lionesses FC · Match 1</div>
+            <div class="vote-bar"><div class="vote-bar-fill" style="width:52%"></div></div>
+            <div class="vote-count">163 votes · 52%</div>
+            <button class="vote-btn" onclick="castVote('vid-1')">Vote for this goal</button>
+          </div>
+        </div>
+
+        <div class="video-card" id="vid-2">
+          <div class="video-thumb" style="background:linear-gradient(135deg,#0f1a0a,#0d0f12);">
+            <div class="play-btn">▶</div>
+          </div>
+          <div class="video-info">
+            <div class="video-title">Aliya — Header from the corner</div>
+            <div class="video-meta">Fairy Fari Foundation · Match 2</div>
+            <div class="vote-bar"><div class="vote-bar-fill" style="width:30%"></div></div>
+            <div class="vote-count">94 votes · 30%</div>
+            <button class="vote-btn" onclick="castVote('vid-2')">Vote for this goal</button>
+          </div>
+        </div>
+
+        <div class="video-card" id="vid-3">
+          <div class="video-thumb" style="background:linear-gradient(135deg,#1a100a,#0d0f12);">
+            <div class="play-btn">▶</div>
+          </div>
+          <div class="video-info">
+            <div class="video-title">Moz — Solo run and finish</div>
+            <div class="video-meta">WADDLERS FC · Match 2</div>
+            <div class="vote-bar"><div class="vote-bar-fill" style="width:18%"></div></div>
+            <div class="vote-count">55 votes · 18%</div>
+            <button class="vote-btn" onclick="castVote('vid-3')">Vote for this goal</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Past poll (closed) -->
+    <div class="sec-title" style="margin-top:8px;">Previous Polls</div>
+    <div class="poll-card" style="opacity:.6;">
+      <div class="poll-title" style="font-size:15px;">Goal of the Pre-Season</div>
+      <div class="poll-meta">Closed · Winner: Saanvi — Long-range effort (Tribal Football) · 284 votes</div>
+    </div>
+  </div>
+
+  <!-- ══ LEADERBOARD ══ -->
+  <div id="tab-leaderboard" class="tab-content">
+    <div class="sec-title">Fan Leaderboard</div>
+
+    <!-- Top 3 podium -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;justify-content:center;align-items:flex-end;">
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:28px;margin-bottom:6px;">🥈</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 8px;">
+          <div style="font-size:13px;font-weight:700;">Neha K.</div>
+          <div style="font-size:20px;font-weight:900;color:var(--green);margin-top:4px;">41</div>
+          <div style="font-size:10px;color:var(--muted);">pts</div>
+        </div>
+      </div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:36px;margin-bottom:6px;">🥇</div>
+        <div style="background:rgba(163,230,53,.07);border:1px solid rgba(163,230,53,.25);border-radius:10px;padding:18px 8px;">
+          <div style="font-size:14px;font-weight:700;">Riya M.</div>
+          <div style="font-size:24px;font-weight:900;color:var(--green);margin-top:4px;">58</div>
+          <div style="font-size:10px;color:var(--muted);">pts</div>
+        </div>
+      </div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:28px;margin-bottom:6px;">🥉</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 8px;">
+          <div style="font-size:13px;font-weight:700;">Priya S.</div>
+          <div style="font-size:20px;font-weight:900;color:var(--green);margin-top:4px;">37</div>
+          <div style="font-size:10px;color:var(--muted);">pts</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div class="lb-row lb-row" style="border-bottom:1px solid var(--border);padding:10px 16px;background:#0f1116;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">#</div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Fan</div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Pts</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-pos gold">1</div>
+        <div><div class="lb-name">Riya M.</div><div class="lb-sub">8 predictions · 5 correct</div></div>
+        <div><div class="lb-pts">58</div><div class="lb-pts-lbl">points</div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-pos silver">2</div>
+        <div><div class="lb-name">Neha K.</div><div class="lb-sub">8 predictions · 4 correct</div></div>
+        <div><div class="lb-pts">41</div><div class="lb-pts-lbl">points</div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-pos bronze">3</div>
+        <div><div class="lb-name">Priya S.</div><div class="lb-sub">7 predictions · 4 correct</div></div>
+        <div><div class="lb-pts">37</div><div class="lb-pts-lbl">points</div></div>
+      </div>
+      <div class="lb-row me">
+        <div class="lb-pos" style="color:var(--text);">4</div>
+        <div><div class="lb-name">You (Priya N.) <span class="me-tag">YOU</span></div><div class="lb-sub">6 predictions · 3 correct</div></div>
+        <div><div class="lb-pts">26</div><div class="lb-pts-lbl">points</div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-pos">5</div>
+        <div><div class="lb-name">Aisha R.</div><div class="lb-sub">5 predictions · 2 correct</div></div>
+        <div><div class="lb-pts">19</div><div class="lb-pts-lbl">points</div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-pos">6</div>
+        <div><div class="lb-name">Smita L.</div><div class="lb-sub">4 predictions · 2 correct</div></div>
+        <div><div class="lb-pts">14</div><div class="lb-pts-lbl">points</div></div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-pos">7</div>
+        <div><div class="lb-name">Kavya T.</div><div class="lb-sub">3 predictions · 1 correct</div></div>
+        <div><div class="lb-pts">7</div><div class="lb-pts-lbl">points</div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;text-align:center;font-size:12px;color:var(--muted);">
+      🏆 Season prizes: ₹1st · ₹2nd · ₹3rd &nbsp;·&nbsp; Final rankings on 20 Sep 2026
+    </div>
+  </div>
+
+</main>
+
+<footer class="foot">
+  WFL — Football Built For Women &nbsp;·&nbsp; Delhi &nbsp;·&nbsp;
+  <a href="https://wflfooty.com">wflfooty.com</a>
+</footer>
+
+<script>
+// ── Tab switching ──
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── Fan registration (prototype only) ──
+function registerFan() {
+  const name = document.getElementById('reg-name').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
+  document.getElementById('predict-register').style.display = 'none';
+  document.getElementById('predict-form').style.display = 'block';
+  document.getElementById('fan-name-display').textContent = `Hey, ${name.split(' ')[0]}! 👋`;
+}
+
+// ── Save prediction (prototype only) ──
+function savePrediction(matchNo, btn) {
+  btn.textContent = '✓ Saved';
+  btn.style.background = 'rgba(163,230,53,.15)';
+  btn.style.color = 'var(--green)';
+  btn.style.border = '1px solid rgba(163,230,53,.3)';
+  setTimeout(() => {
+    btn.textContent = 'Update';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.border = '';
+  }, 1500);
+}
+
+// ── Vote (prototype only) ──
+let voted = false;
+function castVote(videoId) {
+  if (voted) return;
+  voted = true;
+  document.querySelectorAll('.vote-btn').forEach(btn => {
+    btn.textContent = 'Thanks for voting!';
+    btn.disabled = true;
+    btn.style.opacity = '.5';
+  });
+  const card = document.getElementById(videoId);
+  card.classList.add('voted');
+  const btn = card.querySelector('.vote-btn');
+  btn.textContent = '✓ Your vote';
+  btn.classList.add('selected');
+  btn.style.opacity = '1';
+}
+
+// ── Static standings ──
+const TEAMS = [
+  { name:'Lionesses FC',        color:'#EC4899', p:3,w:2,d:1,l:0,gf:7,ga:3,gd:4,pts:7 },
+  { name:'OOO FC',              color:'#F59E0B', p:3,w:2,d:0,l:1,gf:6,ga:4,gd:2,pts:6 },
+  { name:'Fairy Fari Foundation',color:'#22C55E',p:3,w:1,d:2,l:0,gf:4,ga:3,gd:1,pts:5 },
+  { name:'WADDLERS FC',         color:'#A78BFA', p:3,w:1,d:1,l:1,gf:5,ga:5,gd:0,pts:4 },
+  { name:'KKM',                 color:'#EF4444', p:3,w:0,d:1,l:2,gf:2,ga:6,gd:-4,pts:1 },
+  { name:'Tribal Football',     color:'#3B82F6', p:3,w:0,d:1,l:2,gf:2,ga:5,gd:-3,pts:1 },
+];
+function abbr(n) { return n.trim().split(/\s+/).filter(w=>w.length>2)[0]?.slice(0,3).toUpperCase() || n.slice(0,3).toUpperCase(); }
+const sb = document.getElementById('standings-body');
+TEAMS.forEach((t,i) => {
+  sb.innerHTML += `<tr class="${i===0?'leader-row':''}">
+    <td class="pos" style="color:var(--muted);font-size:11px;">${i+1}</td>
+    <td class="left"><div class="club-cell">
+      <div class="badge" style="background:${t.color}">${abbr(t.name)}</div>${t.name}
+    </div></td>
+    <td>${t.p}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+    <td class="hide-sm">${t.gf}</td><td class="hide-sm">${t.ga}</td>
+    <td class="hide-sm">${t.gd>0?'+'+t.gd:t.gd}</td>
+    <td class="pts-col">${t.pts}</td>
+  </tr>`;
+});
+
+// ── Static fixtures ──
+const BLOCKS = [
+  { label:'Block 1', start:'8 Jun', end:'17 Jun', matches:[
+    {h:'Lionesses FC',a:'Fairy Fari Foundation',hs:3,as:1},
+    {h:'Fairy Fari Foundation',a:'WADDLERS FC',hs:2,as:0},
+    {h:'OOO FC',a:'KKM',hs:1,as:1},
+  ]},
+  { label:'Block 2', start:'18 Jun', end:'27 Jun', matches:[
+    {h:'WADDLERS FC',a:'KKM'},
+    {h:'KKM',a:'Lionesses FC'},
+    {h:'OOO FC',a:'Fairy Fari Foundation'},
+  ]},
+  { label:'Block 3', start:'28 Jun', end:'7 Jul', matches:[
+    {h:'Tribal Football',a:'KKM'},
+    {h:'WADDLERS FC',a:'OOO FC'},
+    {h:'Tribal Football',a:'Lionesses FC'},
+  ]},
+];
+const COLORS = {lioness:'#EC4899',ooo:'#F59E0B',fairy:'#22C55E',waddlers:'#A78BFA',kkm:'#EF4444',tribal:'#3B82F6'};
+function teamColor(n) { const k=n.toLowerCase(); for(const [p,v] of Object.entries(COLORS)) if(k.includes(p)) return v; return '#6b7080'; }
+const fb = document.getElementById('fixtures-body');
+BLOCKS.forEach((b,i) => {
+  const played = b.matches.filter(m=>m.hs!=null).length;
+  const chip = played===b.matches.length ? '<span class="chip done">Complete</span>' : played>0 ? `<span class="chip active">${played}/${b.matches.length}</span>` : '';
+  const rows = b.matches.map(m => {
+    const s = m.hs!=null
+      ? `<div class="score played"><span class="score-n">${m.hs}</span><span class="score-dash">–</span><span class="score-n">${m.as}</span></div>`
+      : `<div class="score"><span class="score-vs">vs</span></div>`;
+    return `<div class="match-row">
+      <div class="match-home"><span class="match-name">${m.h}</span><div class="badge" style="background:${teamColor(m.h)}">${abbr(m.h)}</div></div>
+      ${s}
+      <div class="match-away"><div class="badge" style="background:${teamColor(m.a)}">${abbr(m.a)}</div><span class="match-name">${m.a}</span></div>
+    </div>`;
+  }).join('');
+  fb.innerHTML += `<div class="blk${i===0?' open':''}">
+    <div class="blk-hdr" onclick="this.parentElement.querySelector('.blk-body').style.display = this.parentElement.querySelector('.blk-body').style.display==='none'?'block':'none'">
+      <div><div class="blk-name">${b.label} ${chip}</div><div class="blk-dates">${b.start} – ${b.end}</div></div>
+      <span style="color:var(--muted)">▾</span>
+    </div>
+    <div class="blk-body" style="display:${i===0?'block':'none'}">${rows}</div>
+  </div>`;
+});
+</script>
+</body>
+</html>
