@@ -315,6 +315,29 @@ a { color: inherit; }
               </div>
             </div>
           </div>
+          <div>
+            <div class="pred-section-lbl">Who will score in this match?</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <select style="background:#13161c;border:1px solid var(--border2);border-radius:7px;padding:9px 12px;color:var(--text);font-size:13px;width:100%;outline:none;">
+                <option value="">— Pick a player —</option>
+                <optgroup label="Lionesses FC">
+                  <option>Disha Malhotra</option>
+                  <option>Kanika Singh</option>
+                  <option>Aditi Sabharwal</option>
+                  <option>Anya Goyal</option>
+                  <option>Rediet Amari Mulu</option>
+                </optgroup>
+                <optgroup label="Fairy Fari Foundation">
+                  <option>Aliya</option>
+                  <option>Suhana</option>
+                  <option>Zoya</option>
+                  <option>Shifa</option>
+                  <option>Priyanka</option>
+                </optgroup>
+              </select>
+              <div style="font-size:11px;color:var(--muted);">Correct pick = +3 pts</div>
+            </div>
+          </div>
         </div>
         <div class="submit-row">
           <button class="btn-submit" onclick="savePrediction(1, this)">Save prediction</button>
@@ -366,6 +389,26 @@ a { color: inherit; }
                 <input type="number" min="0" max="20" value="0" id="s2-away">
               </div>
             </div>
+          </div>
+          <div>
+            <div class="pred-section-lbl">Who will score in this match?</div>
+            <select style="background:#13161c;border:1px solid var(--border2);border-radius:7px;padding:9px 12px;color:var(--text);font-size:13px;width:100%;outline:none;">
+              <option value="">— Pick a player —</option>
+              <optgroup label="Fairy Fari Foundation">
+                <option>Aliya</option>
+                <option>Suhana</option>
+                <option>Zoya</option>
+                <option>Shifa</option>
+                <option selected>Priyanka</option>
+              </optgroup>
+              <optgroup label="WADDLERS FC">
+                <option>Mozaien Tak</option>
+                <option>Jyoti Burrett</option>
+                <option>Shriya</option>
+                <option>Deepika</option>
+              </optgroup>
+            </select>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;">Correct pick = +3 pts</div>
           </div>
         </div>
         <div class="submit-row" style="justify-content:space-between;align-items:center;">
