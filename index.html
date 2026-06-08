@@ -3,91 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WFL Ladder S1</title>
+<title>WFL Ladder Season 1</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg:      #07080a;
-  --card:    #0d0f12;
-  --border:  #1a1d23;
-  --green:   #A3E635;
-  --text:    #f0f0f0;
-  --muted:   #6b7080;
-  --amber:   #FBBF24;
-  --red:     #F87171;
+  --bg: #07080a; --card: #0d0f12; --border: #1a1d23;
+  --green: #A3E635; --text: #f0f0f0; --muted: #6b7080;
+  --amber: #FBBF24; --red: #F87171; --blue: #60A5FA;
 }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 14px;
-  min-height: 100vh;
-}
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; }
 
 /* Header */
-.hdr {
-  border-bottom: 1px solid var(--border);
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+.hdr { border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .hdr-left { display: flex; align-items: center; gap: 10px; }
-.hdr-wfl  { font-size: 20px; font-weight: 900; color: var(--green); letter-spacing: -.02em; }
-.hdr-sep  { color: #333; }
+.hdr-wfl { font-size: 20px; font-weight: 900; color: var(--green); letter-spacing: -.02em; }
+.hdr-sep { color: #333; }
 .hdr-title { font-size: 12px; font-weight: 600; color: #999; letter-spacing: .12em; text-transform: uppercase; }
-.hdr-ts   { font-size: 11px; color: var(--muted); }
+.hdr-ts { font-size: 11px; color: var(--muted); }
+
+/* Tabs */
+.tab-nav { display: flex; gap: 2px; padding: 0 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tab-btn { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-size: 13px; font-weight: 600; padding: 12px 16px; cursor: pointer; white-space: nowrap; margin-bottom: -1px; transition: color .15s; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
 
 /* Layout */
 .wrap { max-width: 860px; margin: 0 auto; padding: 28px 16px 64px; }
-.section { margin-bottom: 40px; }
-.sec-title {
-  font-size: 10px; font-weight: 700; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--muted);
-  margin-bottom: 14px; padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
+.sec-title { font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
 
-/* ── Points table ── */
+/* Points table */
 .tbl { width: 100%; border-collapse: collapse; }
-.tbl thead th {
-  font-size: 10px; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--muted);
-  padding: 6px 8px; text-align: center;
-  border-bottom: 1px solid var(--border);
-}
+.tbl thead th { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--border); }
 .tbl thead th.left { text-align: left; }
 .tbl tbody tr { border-bottom: 1px solid var(--border); }
 .tbl tbody tr:last-child { border-bottom: none; }
 .tbl tbody tr:hover { background: #0e1015; }
 .tbl tbody td { padding: 11px 8px; text-align: center; font-size: 13px; }
 .tbl tbody td.left { text-align: left; }
-.tbl .pos  { color: var(--muted); font-size: 11px; width: 24px; }
-.tbl .club { display: flex; align-items: center; gap: 8px; }
-.tbl .pts  { font-weight: 800; color: var(--green); font-size: 15px; }
-.tbl .leader td:first-child { border-left: 3px solid var(--green); }
-.badge {
-  width: 26px; height: 26px; border-radius: 5px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 900; color: #07080a;
-}
+.club { display: flex; align-items: center; gap: 8px; }
+.pts { font-weight: 800; color: var(--green); font-size: 15px; }
+.leader td:first-child { border-left: 3px solid var(--green); }
+.badge { width: 26px; height: 26px; border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; color: #07080a; }
 
-/* ── Fixtures ── */
-.blk {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  margin-bottom: 8px;
-  overflow: hidden;
-}
-.blk-hdr {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 13px 16px; cursor: pointer; user-select: none; gap: 12px;
-}
+/* Top scorers */
+.scorer-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #07080a; }
+.top-scorer td { padding: 12px 8px; }
+
+/* Fixtures */
+.blk { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+.blk-hdr { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; cursor: pointer; user-select: none; gap: 12px; }
 .blk-hdr:hover { background: #0e1015; }
 .blk-name { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 .blk-dates { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -95,53 +61,33 @@ body {
 .blk.open .blk-arrow { transform: rotate(180deg); }
 .blk-body { display: none; border-top: 1px solid var(--border); }
 .blk.open .blk-body { display: block; }
-
-.match {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.match:last-child { border-bottom: none; }
+.match-wrap { border-bottom: 1px solid var(--border); }
+.match-wrap:last-child { border-bottom: none; }
+.match-meta { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 0; }
+.match-num { font-size: 11px; color: var(--muted); }
+.status-pill { font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 8px; letter-spacing: .04em; }
+.status-pill.upcoming   { background: rgba(96,165,250,.1);  color: var(--blue); }
+.status-pill.completed  { background: rgba(163,230,53,.12); color: var(--green); }
+.match { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 10px 16px 13px; }
 .match-home { display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
 .match-away { display: flex; align-items: center; gap: 7px; }
 .match-name { font-size: 13px; font-weight: 600; }
 .match-home .match-name { text-align: right; }
-
-.score {
-  display: flex; align-items: center; gap: 5px;
-  background: #13161c; border: 1px solid var(--border);
-  border-radius: 7px; padding: 7px 12px;
-  min-width: 68px; justify-content: center;
-}
+.score { display: flex; align-items: center; gap: 5px; background: #13161c; border: 1px solid var(--border); border-radius: 7px; padding: 7px 12px; min-width: 68px; justify-content: center; }
 .score.played { background: rgba(163,230,53,.07); border-color: rgba(163,230,53,.18); }
 .score-n { font-size: 16px; font-weight: 800; line-height: 1; }
 .score.played .score-n { color: var(--green); }
 .score-dash { color: var(--muted); font-size: 11px; }
-.score-vs { font-size: 11px; color: var(--muted); letter-spacing: .06em; }
-
-/* status chips */
-.chip {
-  font-size: 10px; font-weight: 700; letter-spacing: .06em;
-  border-radius: 4px; padding: 2px 7px;
-}
+.score-vs { font-size: 11px; color: var(--muted); }
+.chip { font-size: 10px; font-weight: 700; letter-spacing: .06em; border-radius: 4px; padding: 2px 7px; }
 .chip.done   { background: rgba(163,230,53,.12); color: var(--green); }
 .chip.active { background: rgba(251,191,36,.12); color: var(--amber); }
 
-/* loading / error */
-.msg { text-align: center; padding: 52px 20px; color: var(--muted); }
+/* misc */
+.msg  { text-align: center; padding: 52px 20px; color: var(--muted); }
 .msg.err { color: var(--red); }
-
-/* footer */
-.foot {
-  text-align: center; font-size: 11px; color: var(--muted);
-  padding: 20px; border-top: 1px solid var(--border);
-}
+.foot { text-align: center; font-size: 11px; color: var(--muted); padding: 20px; border-top: 1px solid var(--border); }
 .foot a { color: var(--green); text-decoration: none; }
-
-/* responsive */
 @media (max-width: 500px) {
   .hide-sm { display: none; }
   .match-name { font-size: 12px; }
@@ -160,6 +106,11 @@ body {
   <span class="hdr-ts" id="ts"></span>
 </header>
 
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('table', this)">Table</button>
+  <button class="tab-btn" onclick="switchTab('fixtures', this)">Fixtures</button>
+</nav>
+
 <main class="wrap">
   <div id="app"><div class="msg">Loading…</div></div>
 </main>
@@ -170,15 +121,7 @@ body {
 </footer>
 
 <script>
-// Team colours — keyed on a substring of the team name (lowercase)
-const COLORS = {
-  tribal:   '#3B82F6',
-  fairy:    '#22C55E',
-  ooo:      '#F59E0B',
-  kkm:      '#EF4444',
-  waddlers: '#A78BFA',
-  lioness:  '#EC4899',
-};
+const COLORS = { tribal:'#3B82F6', fairy:'#22C55E', ooo:'#F59E0B', kkm:'#EF4444', waddlers:'#A78BFA', lioness:'#EC4899' };
 
 function color(name) {
   const n = (name || '').toLowerCase();
@@ -193,35 +136,25 @@ function abbr(name) {
 
 function fmtDate(raw) {
   if (!raw) return '';
-  // Handles "8-Jun-2026" or "2026-06-08"
   try {
-    const d = raw.match(/^\d{4}-/)
-      ? new Date(raw)
+    const d = raw.match(/^\d{4}-/) ? new Date(raw)
       : new Date(raw.replace(/^(\d+)-([A-Za-z]+)-(\d{4})$/, '$2 $1, $3'));
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   } catch { return raw; }
 }
 
-function standings(data) {
-  if (!data.length) return '<p class="msg">No standings yet — season starts 8 Jun.</p>';
-  const rows = data.map((s, i) => `
-    <tr class="${i === 0 ? 'leader' : ''}">
-      <td class="pos">${i + 1}</td>
-      <td class="left">
-        <div class="club">
-          <div class="badge" style="background:${color(s.name)}">${abbr(s.name)}</div>
-          <span>${s.name}</span>
-        </div>
-      </td>
-      <td>${s.p}</td>
-      <td>${s.w}</td>
-      <td>${s.d}</td>
-      <td>${s.l}</td>
-      <td class="hide-sm">${s.gf}</td>
-      <td class="hide-sm">${s.ga}</td>
-      <td class="hide-sm">${s.gd > 0 ? '+' + s.gd : s.gd}</td>
-      <td class="pts">${s.pts}</td>
-    </tr>`).join('');
+let _activeTab = 'table';
+function switchTab(id, btn) {
+  _activeTab = id;
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('pane-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function renderStandings(data) {
+  if (!data.length) return '<p class="msg">No standings yet.</p>';
   return `<table class="tbl">
     <thead><tr>
       <th>#</th><th class="left">Club</th>
@@ -229,56 +162,100 @@ function standings(data) {
       <th class="hide-sm">GF</th><th class="hide-sm">GA</th><th class="hide-sm">GD</th>
       <th>Pts</th>
     </tr></thead>
-    <tbody>${rows}</tbody>
+    <tbody>${data.map((s, i) => `
+      <tr class="${i === 0 ? 'leader' : ''}">
+        <td style="color:var(--muted);font-size:11px;width:24px;">${i + 1}</td>
+        <td class="left"><div class="club">
+          <div class="badge" style="background:${color(s.name)}">${abbr(s.name)}</div>
+          <span>${s.name}</span>
+        </div></td>
+        <td>${s.p}</td><td>${s.w}</td><td>${s.d}</td><td>${s.l}</td>
+        <td class="hide-sm">${s.gf}</td><td class="hide-sm">${s.ga}</td>
+        <td class="hide-sm">${s.gd > 0 ? '+' + s.gd : s.gd}</td>
+        <td class="pts">${s.pts}</td>
+      </tr>`).join('')}
+    </tbody>
   </table>`;
 }
 
-function fixtures(blocks) {
-  if (!blocks.length) return '<p class="msg">No fixtures loaded yet.</p>';
+function renderScorers(scorers) {
+  if (!scorers || !scorers.length)
+    return '<p style="color:var(--muted);font-size:13px;font-style:italic;padding:12px 0;">No goals scored yet — check back after the first match.</p>';
+  return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+    <table class="tbl">
+      <thead><tr>
+        <th>#</th><th class="left">Player</th>
+        <th class="left hide-sm">Team</th>
+        <th>Jersey</th><th>Goals</th>
+        <th class="hide-sm">Assists</th>
+      </tr></thead>
+      <tbody>${scorers.map((s, i) => {
+        const c = color(s.team);
+        const initials = s.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        return `<tr class="${i === 0 ? 'top-scorer' : ''}">
+          <td style="color:var(--muted);font-size:11px;width:24px;">${i + 1}</td>
+          <td class="left"><div class="club">
+            <div class="scorer-avatar" style="background:${c}">${initials}</div>
+            <div>
+              <div style="font-weight:600;">${s.name}</div>
+              <div class="hide-sm" style="font-size:11px;color:var(--muted);">${s.team}</div>
+            </div>
+          </div></td>
+          <td class="left hide-sm"><div class="club">
+            <div class="badge" style="background:${c}">${abbr(s.team)}</div>${s.team}
+          </div></td>
+          <td style="color:var(--muted);font-size:12px;">#${s.jersey || '—'}</td>
+          <td style="font-size:${i === 0 ? '20' : '15'}px;font-weight:800;color:${i === 0 ? 'var(--green)' : 'var(--text)'};">${s.goals}</td>
+          <td class="hide-sm" style="color:var(--muted);">${s.assists}</td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
 
-  // Auto-open the first block that has an unplayed match
+function renderFixtures(blocks) {
+  if (!blocks.length) return '<p class="msg">No fixtures loaded yet.</p>';
   const today = new Date(); today.setHours(0, 0, 0, 0);
   let openIdx = blocks.length - 1;
   for (let i = 0; i < blocks.length; i++) {
-    const hasUnplayed = blocks[i].matches.some(m => m.hs === null);
-    if (hasUnplayed) { openIdx = i; break; }
+    if (blocks[i].matches.some(m => m.hs === null)) { openIdx = i; break; }
   }
-
   return blocks.map((b, idx) => {
     const played  = b.matches.filter(m => m.hs !== null).length;
     const total   = b.matches.length;
     const allDone = played === total && total > 0;
     const partial = played > 0 && !allDone;
-    const chip    = allDone
-      ? `<span class="chip done">Complete</span>`
-      : partial
-        ? `<span class="chip active">${played}/${total}</span>`
-        : '';
-
-    const matchRows = b.matches.map(m => {
-      const played = m.hs !== null && m.as !== null;
-      const scoreEl = played
-        ? `<div class="score played">
-             <span class="score-n">${m.hs}</span>
-             <span class="score-dash">–</span>
-             <span class="score-n">${m.as}</span>
-           </div>`
+    const chip    = allDone ? `<span class="chip done">Complete</span>`
+                  : partial ? `<span class="chip active">${played}/${total} played</span>` : '';
+    const dateStr = b.start && b.end ? `${fmtDate(b.start)} – ${fmtDate(b.end)}` : '';
+    const matchRows = b.matches.map((m, mi) => {
+      const isPlayed = m.hs !== null && m.as !== null;
+      const statusPill = isPlayed
+        ? `<span class="status-pill completed">Completed</span>`
+        : `<span class="status-pill upcoming">Upcoming</span>`;
+      const scoreEl = isPlayed
+        ? `<div class="score played"><span class="score-n">${m.hs}</span><span class="score-dash">–</span><span class="score-n">${m.as}</span></div>`
         : `<div class="score"><span class="score-vs">vs</span></div>`;
-      return `<div class="match">
-        <div class="match-home">
-          <span class="match-name">${m.home}</span>
-          <div class="badge" style="background:${color(m.home)}">${abbr(m.home)}</div>
+      return `<div class="match-wrap">
+        <div class="match-meta">
+          <span class="match-num">Match ${m.no}</span>
+          ${statusPill}
         </div>
-        ${scoreEl}
-        <div class="match-away">
-          <div class="badge" style="background:${color(m.away)}">${abbr(m.away)}</div>
-          <span class="match-name">${m.away}</span>
+        <div class="match">
+          <div class="match-home">
+            <span class="match-name">${m.home}</span>
+            <div class="badge" style="background:${color(m.home)}">${abbr(m.home)}</div>
+          </div>
+          ${scoreEl}
+          <div class="match-away">
+            <div class="badge" style="background:${color(m.away)}">${abbr(m.away)}</div>
+            <span class="match-name">${m.away}</span>
+          </div>
         </div>
       </div>`;
     }).join('');
-
-    const dateStr = b.start && b.end ? `${fmtDate(b.start)} – ${fmtDate(b.end)}` : '';
-    return `<div class="blk${idx === openIdx ? ' open' : ''}" onclick="toggle(this)">
+    return `<div class="blk${idx === openIdx ? ' open' : ''}" onclick="toggleBlk(this)">
       <div class="blk-hdr">
         <div>
           <div class="blk-name">${b.label} ${chip}</div>
@@ -291,7 +268,7 @@ function fixtures(blocks) {
   }).join('');
 }
 
-function toggle(el) { el.classList.toggle('open'); }
+function toggleBlk(el) { el.classList.toggle('open'); }
 
 async function load() {
   try {
@@ -307,14 +284,19 @@ async function load() {
     }
 
     document.getElementById('app').innerHTML = `
-      <div class="section">
+      <div class="tab-pane active" id="pane-table">
         <div class="sec-title">Points Table</div>
-        ${standings(data.standings)}
+        ${renderStandings(data.standings)}
+        <div class="sec-title" style="margin-top:36px;">Top Scorers</div>
+        ${renderScorers(data.scorers)}
       </div>
-      <div class="section">
+      <div class="tab-pane" id="pane-fixtures">
         <div class="sec-title">Fixtures &amp; Results</div>
-        ${fixtures(data.blocks)}
+        ${renderFixtures(data.blocks)}
       </div>`;
+
+    // Restore active tab after re-render
+    switchTab(_activeTab, document.querySelector(`.tab-btn.active`));
   } catch (e) {
     document.getElementById('app').innerHTML =
       `<div class="msg err">Couldn't load data: ${e.message}</div>`;

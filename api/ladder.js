@@ -30,6 +30,7 @@ export default async function handler(req, res) {
     const data = await batchGet([
       'Fixtures_Revised!A1:G60',
       'Points Table!A1:N35',
+      'Player Stats!A1:E100',
     ]);
 
     // Standings — rows 3-8 in the sheet (index 2-7)
@@ -85,9 +86,23 @@ export default async function handler(req, res) {
       });
     }
 
+    // Top scorers from Player Stats tab (skip header row)
+    const scorers = [];
+    for (const r of (data['Player Stats'] || []).slice(1)) {
+      if (!r?.[0]?.trim()) continue;
+      scorers.push({
+        name:    r[0].trim(),
+        team:    (r[1] || '').trim(),
+        jersey:  (r[2] || '').trim(),
+        goals:   num(r[3]) ?? 0,
+        assists: num(r[4]) ?? 0,
+      });
+    }
+    scorers.sort((a, b) => b.goals - a.goals || b.assists - a.assists);
+
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.json({ standings, blocks: Object.values(blocks), updated: new Date().toISOString() });
+    res.json({ standings, blocks: Object.values(blocks), scorers, updated: new Date().toISOString() });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
