@@ -28,7 +28,7 @@ function num(v) {
 export default async function handler(req, res) {
   try {
     const data = await batchGet([
-      'Fixtures_Revised!A1:G60',
+      'Fixtures_Revised!A1:J60',
       'Points Table!A1:N35',
       'Player Stats!A1:E100',
     ]);
@@ -83,6 +83,9 @@ export default async function handler(req, res) {
         home, away,
         hs: score?.hs ?? null,
         as: score?.as ?? null,
+        match_date: (r[7] || '').trim(),
+        start_time: (r[8] || '').trim(),
+        end_time:   (r[9] || '').trim(),
       });
     }
 

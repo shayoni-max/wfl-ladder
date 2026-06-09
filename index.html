@@ -232,6 +232,31 @@ function fmtDate(raw) {
   } catch { return raw; }
 }
 
+// ── Prediction lock config ──
+const PRED_LOCK_MINUTES = 30; // lock predictions this many minutes before kickoff
+
+function kickoffDate(match) {
+  if (!match.match_date || !match.start_time) return null;
+  // match_date = "8 June", start_time = "7:30 pm" — infer year from block start
+  const year = 2026;
+  try {
+    return new Date(`${match.match_date} ${year} ${match.start_time}`);
+  } catch { return null; }
+}
+
+function isPredLocked(match) {
+  if (match.hs !== null) return true; // already played
+  const kickoff = kickoffDate(match);
+  if (!kickoff || isNaN(kickoff)) return false; // no time set = open
+  return Date.now() >= kickoff.getTime() - PRED_LOCK_MINUTES * 60 * 1000;
+}
+
+function fmtKickoff(match) {
+  const d = kickoffDate(match);
+  if (!d || isNaN(d)) return null;
+  return d.toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
 // ── State ──
 let _activeTab = 'table';
 let _data      = null;   // ladder data
@@ -486,9 +511,10 @@ function renderPredictPane() {
 
   let cards = '';
   for (const b of blocks) {
-    const upcoming = b.matches.filter(m => m.hs === null);
     const played   = b.matches.filter(m => m.hs !== null);
-    if (!upcoming.length && !played.length) continue;
+    const timeLocked = b.matches.filter(m => m.hs === null && isPredLocked(m));
+    const upcoming = b.matches.filter(m => m.hs === null && !isPredLocked(m));
+    if (!upcoming.length && !timeLocked.length && !played.length) continue;
 
     cards += `<div class="predict-block-lbl">
       <span style="background:rgba(163,230,53,.12);color:var(--green);border-radius:5px;padding:3px 8px;font-size:11px;">${b.label}</span>
@@ -498,6 +524,7 @@ function renderPredictPane() {
     // Upcoming — editable
     for (const m of upcoming) {
       const p = _preds[m.no];
+      const kickoffStr = fmtKickoff(m);
       cards += `<div class="predict-card">
         <div class="pred-matchup">
           <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
@@ -533,9 +560,27 @@ function renderPredictPane() {
           </div>
         </div>
         <div class="pred-footer">
-          <span class="pred-saved" id="saved-${m.no}" style="display:${p ? 'block' : 'none'}">✓ Saved</span>
-          <span></span>
-          <button class="btn-save" onclick="savePrediction(${m.no}, this)">${p ? 'Update' : 'Save'}</button>
+          <span style="font-size:11px;color:var(--muted);">${kickoffStr ? '🕐 Closes ' + kickoffStr : 'Predictions open'}</span>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="pred-saved" id="saved-${m.no}" style="display:${p ? 'inline' : 'none'}">✓ Saved</span>
+            <button class="btn-save" onclick="savePrediction(${m.no}, this)">${p ? 'Update' : 'Save'}</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // Time-locked — predictions closed, result not yet entered
+    for (const m of timeLocked) {
+      const p = _preds[m.no];
+      const kickoffStr = fmtKickoff(m);
+      cards += `<div class="predict-card locked">
+        <div class="pred-matchup">
+          <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
+          <div class="pred-vs">vs</div>
+          <div><div class="pred-team">${m.away}</div></div>
+        </div>
+        <div class="pred-locked-msg">🔒 Predictions closed${kickoffStr ? ' — kickoff ' + kickoffStr : ''}
+          ${p ? `<br><span style="color:var(--muted);font-size:11px;">Your pick: ${p.predicted_winner === 'home' ? abbr(m.home) : p.predicted_winner === 'away' ? abbr(m.away) : 'Draw'}${p.predicted_home_score !== null ? ' · ' + p.predicted_home_score + '–' + p.predicted_away_score : ''}${p.predicted_scorer ? ' · ' + p.predicted_scorer : ''}</span>` : '<br><span style="color:var(--muted);font-size:11px;">No prediction submitted</span>'}
         </div>
       </div>`;
     }
