@@ -10,6 +10,7 @@
   --bg: #07080a; --card: #0d0f12; --border: #1a1d23;
   --green: #A3E635; --text: #f0f0f0; --muted: #6b7080;
   --amber: #FBBF24; --red: #F87171; --blue: #60A5FA;
+  --border2: #252930;
 }
 body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; }
 
@@ -83,6 +84,93 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .chip.done   { background: rgba(163,230,53,.12); color: var(--green); }
 .chip.active { background: rgba(251,191,36,.12); color: var(--amber); }
 
+/* ── Fan registration ── */
+.fan-gate { max-width: 420px; margin: 0 auto 32px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 32px 28px; text-align: center; }
+.fan-gate h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.fan-gate p  { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+.field { text-align: left; margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .08em; }
+.field input { width: 100%; background: #13161c; border: 1px solid var(--border2); border-radius: 7px; padding: 10px 12px; color: var(--text); font-size: 14px; outline: none; transition: border .15s; }
+.field input:focus { border-color: var(--green); }
+.btn-green { width: 100%; background: var(--green); color: #07080a; border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 8px; }
+.btn-green:hover { opacity: .9; }
+.btn-green:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Fan greeting bar */
+.fan-bar { background: rgba(163,230,53,.06); border: 1px solid rgba(163,230,53,.2); border-radius: 10px; padding: 14px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.fan-bar-name { font-size: 15px; font-weight: 700; }
+.fan-bar-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.fan-pts-big  { font-size: 24px; font-weight: 900; color: var(--green); }
+.fan-pts-lbl  { font-size: 10px; color: var(--muted); text-align: right; }
+.btn-logout { background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--muted); font-size: 11px; font-weight: 600; padding: 4px 10px; cursor: pointer; }
+.btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* Predict cards */
+.predict-block-lbl { font-size: 13px; font-weight: 700; color: var(--muted); margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
+.predict-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.predict-card.locked { opacity: .65; }
+.pred-matchup { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); }
+.pred-team { font-size: 13px; font-weight: 700; }
+.pred-home { text-align: right; }
+.pred-vs { font-size: 12px; color: var(--muted); font-weight: 700; }
+.pred-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+.pred-lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+.winner-opts { display: flex; gap: 8px; }
+.winner-opt { flex: 1; }
+.winner-opt input[type=radio] { display: none; }
+.winner-opt label { display: block; text-align: center; padding: 8px 6px; background: #13161c; border: 1px solid var(--border2); border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.winner-opt input:checked + label { background: rgba(163,230,53,.1); border-color: var(--green); color: var(--green); }
+.score-inputs { display: flex; align-items: center; gap: 10px; }
+.score-inputs input { width: 56px; background: #13161c; border: 1px solid var(--border2); border-radius: 7px; padding: 8px; color: var(--text); font-size: 18px; font-weight: 800; text-align: center; outline: none; }
+.score-inputs input:focus { border-color: var(--green); }
+.score-inputs span { color: var(--muted); font-weight: 700; }
+.scorer-input { width: 100%; background: #13161c; border: 1px solid var(--border2); border-radius: 7px; padding: 9px 12px; color: var(--text); font-size: 13px; outline: none; }
+.scorer-input:focus { border-color: var(--green); }
+.pred-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.pred-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--border); }
+.pred-saved { font-size: 12px; color: var(--green); font-weight: 700; }
+.pred-locked-msg { font-size: 12px; color: var(--muted); font-style: italic; padding: 12px 16px; }
+.btn-save { background: var(--green); color: #07080a; border: none; border-radius: 7px; padding: 8px 20px; font-size: 13px; font-weight: 800; cursor: pointer; }
+.btn-save:hover { opacity: .9; }
+.btn-save:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Actual result vs prediction */
+.pred-result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 12px; }
+.pred-result-actual { color: var(--muted); }
+.pred-result-pts { font-size: 14px; font-weight: 800; color: var(--green); }
+
+/* Voting */
+.poll-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+.poll-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.poll-meta  { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+.vote-grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.vote-opt   { background: #13161c; border: 1px solid var(--border2); border-radius: 8px; padding: 14px; }
+.vote-opt.my-vote { border-color: var(--green); background: rgba(163,230,53,.05); }
+.vote-opt-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.vote-opt-meta  { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.vote-bar       { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
+.vote-bar-fill  { height: 100%; background: var(--green); border-radius: 2px; transition: width .4s; }
+.vote-count     { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.btn-vote { width: 100%; background: none; border: 1px solid var(--border2); border-radius: 6px; padding: 7px; font-size: 12px; font-weight: 700; color: var(--text); cursor: pointer; }
+.btn-vote:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.btn-vote.voted { background: rgba(163,230,53,.1); border-color: var(--green); color: var(--green); cursor: default; }
+.btn-vote:disabled { opacity: .5; cursor: not-allowed; }
+.no-poll { text-align: center; padding: 40px 20px; color: var(--muted); font-style: italic; }
+
+/* Leaderboard */
+.lb-table { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.lb-row { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+.lb-row:last-child { border-bottom: none; }
+.lb-row.me { background: rgba(163,230,53,.04); }
+.lb-pos { font-size: 13px; font-weight: 800; color: var(--muted); text-align: center; }
+.lb-pos.gold   { color: #FBBF24; }
+.lb-pos.silver { color: #CBD5E1; }
+.lb-pos.bronze { color: #C8855C; }
+.lb-name { font-size: 14px; font-weight: 600; }
+.lb-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.lb-pts  { font-size: 18px; font-weight: 900; color: var(--green); }
+.lb-empty { text-align: center; padding: 48px 20px; color: var(--muted); font-style: italic; }
+
 /* misc */
 .msg  { text-align: center; padding: 52px 20px; color: var(--muted); }
 .msg.err { color: var(--red); }
@@ -92,6 +180,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
   .hide-sm { display: none; }
   .match-name { font-size: 12px; }
   .badge { width: 22px; height: 22px; font-size: 8px; }
+  .vote-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -109,6 +198,8 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('table', this)">Table</button>
   <button class="tab-btn" onclick="switchTab('fixtures', this)">Fixtures</button>
+  <button class="tab-btn" onclick="switchTab('predict', this)">Predict &amp; Vote</button>
+  <button class="tab-btn" onclick="switchTab('leaderboard', this)">Leaderboard</button>
 </nav>
 
 <main class="wrap">
@@ -128,12 +219,10 @@ function color(name) {
   for (const [k, v] of Object.entries(COLORS)) if (n.includes(k)) return v;
   return '#6b7080';
 }
-
 function abbr(name) {
   const words = name.trim().split(/\s+/).filter(w => w.length > 2);
   return (words[0] || name).slice(0, 3).toUpperCase();
 }
-
 function fmtDate(raw) {
   if (!raw) return '';
   try {
@@ -143,7 +232,18 @@ function fmtDate(raw) {
   } catch { return raw; }
 }
 
+// ── State ──
 let _activeTab = 'table';
+let _data      = null;   // ladder data
+let _fan       = JSON.parse(localStorage.getItem('wfl_fan') || 'null');
+let _preds     = {};     // match_no → prediction
+let _voteData  = null;
+let _lb        = [];
+
+function saveFanLocal(fan) { _fan = fan; localStorage.setItem('wfl_fan', JSON.stringify(fan)); }
+function clearFan()        { _fan = null; localStorage.removeItem('wfl_fan'); }
+
+// ── Tab switching ──
 function switchTab(id, btn) {
   _activeTab = id;
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -151,8 +251,11 @@ function switchTab(id, btn) {
   const pane = document.getElementById('pane-' + id);
   if (pane) pane.classList.add('active');
   if (btn) btn.classList.add('active');
+  if (id === 'predict')     renderPredictPane();
+  if (id === 'leaderboard') renderLeaderboardPane();
 }
 
+// ── Standings ──
 function renderStandings(data) {
   if (!data.length) return '<p class="msg">No standings yet.</p>';
   return `<table class="tbl">
@@ -174,10 +277,10 @@ function renderStandings(data) {
         <td class="hide-sm">${s.gd > 0 ? '+' + s.gd : s.gd}</td>
         <td class="pts">${s.pts}</td>
       </tr>`).join('')}
-    </tbody>
-  </table>`;
+    </tbody></table>`;
 }
 
+// ── Scorers ──
 function renderScorers(scorers) {
   if (!scorers || !scorers.length)
     return '<p style="color:var(--muted);font-size:13px;font-style:italic;padding:12px 0;">No goals scored yet — check back after the first match.</p>';
@@ -196,10 +299,7 @@ function renderScorers(scorers) {
           <td style="color:var(--muted);font-size:11px;width:24px;">${i + 1}</td>
           <td class="left"><div class="club">
             <div class="scorer-avatar" style="background:${c}">${initials}</div>
-            <div>
-              <div style="font-weight:600;">${s.name}</div>
-              <div class="hide-sm" style="font-size:11px;color:var(--muted);">${s.team}</div>
-            </div>
+            <div><div style="font-weight:600;">${s.name}</div></div>
           </div></td>
           <td class="left hide-sm"><div class="club">
             <div class="badge" style="background:${c}">${abbr(s.team)}</div>${s.team}
@@ -209,14 +309,12 @@ function renderScorers(scorers) {
           <td class="hide-sm" style="color:var(--muted);">${s.assists}</td>
         </tr>`;
       }).join('')}
-      </tbody>
-    </table>
-  </div>`;
+      </tbody></table></div>`;
 }
 
+// ── Fixtures ──
 function renderFixtures(blocks) {
   if (!blocks.length) return '<p class="msg">No fixtures loaded yet.</p>';
-  const today = new Date(); today.setHours(0, 0, 0, 0);
   let openIdx = blocks.length - 1;
   for (let i = 0; i < blocks.length; i++) {
     if (blocks[i].matches.some(m => m.hs === null)) { openIdx = i; break; }
@@ -229,8 +327,8 @@ function renderFixtures(blocks) {
     const chip    = allDone ? `<span class="chip done">Complete</span>`
                   : partial ? `<span class="chip active">${played}/${total} played</span>` : '';
     const dateStr = b.start && b.end ? `${fmtDate(b.start)} – ${fmtDate(b.end)}` : '';
-    const matchRows = b.matches.map((m, mi) => {
-      const isPlayed = m.hs !== null && m.as !== null;
+    const matchRows = b.matches.map(m => {
+      const isPlayed  = m.hs !== null && m.as !== null;
       const statusPill = isPlayed
         ? `<span class="status-pill completed">Completed</span>`
         : `<span class="status-pill upcoming">Upcoming</span>`;
@@ -238,10 +336,7 @@ function renderFixtures(blocks) {
         ? `<div class="score played"><span class="score-n">${m.hs}</span><span class="score-dash">–</span><span class="score-n">${m.as}</span></div>`
         : `<div class="score"><span class="score-vs">vs</span></div>`;
       return `<div class="match-wrap">
-        <div class="match-meta">
-          <span class="match-num">Match ${m.no}</span>
-          ${statusPill}
-        </div>
+        <div class="match-meta"><span class="match-num">Match ${m.no}</span>${statusPill}</div>
         <div class="match">
           <div class="match-home">
             <span class="match-name">${m.home}</span>
@@ -267,18 +362,295 @@ function renderFixtures(blocks) {
     </div>`;
   }).join('');
 }
-
 function toggleBlk(el) { el.classList.toggle('open'); }
 
+// ── Fan registration ──
+async function registerFan() {
+  const name  = document.getElementById('reg-name')?.value?.trim();
+  const phone = document.getElementById('reg-phone')?.value?.trim();
+  if (!name || !phone) return;
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true; btn.textContent = 'Joining…';
+  try {
+    const r = await fetch('/api/fan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Failed');
+    saveFanLocal(d.fan);
+    await loadFanData();
+    renderPredictPane();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Join Now — It\'s Free';
+    alert('Could not register: ' + e.message);
+  }
+}
+
+// ── Load fan's predictions + vote data ──
+async function loadFanData() {
+  if (!_fan) return;
+  const [predRes, voteRes] = await Promise.all([
+    fetch(`/api/predictions?fan_id=${_fan.id}`).then(r => r.json()).catch(() => ({ predictions: [] })),
+    fetch(`/api/vote?fan_id=${_fan.id}`).then(r => r.json()).catch(() => ({ poll: null })),
+  ]);
+  _preds = {};
+  for (const p of (predRes.predictions || [])) _preds[p.match_no] = p;
+  _voteData = voteRes;
+}
+
+// ── Load vote data (no fan needed for counts) ──
+async function loadVoteData() {
+  try {
+    const url = _fan ? `/api/vote?fan_id=${_fan.id}` : '/api/vote';
+    _voteData = await fetch(url).then(r => r.json());
+  } catch { _voteData = { poll: null }; }
+}
+
+// ── Save prediction ──
+async function savePrediction(matchNo, btn) {
+  if (!_fan) return;
+  const winner = document.querySelector(`input[name="winner-${matchNo}"]:checked`)?.value;
+  const hs     = parseInt(document.getElementById(`hs-${matchNo}`)?.value);
+  const as_    = parseInt(document.getElementById(`as-${matchNo}`)?.value);
+  const scorer = document.getElementById(`scorer-${matchNo}`)?.value?.trim() || null;
+  if (!winner) { alert('Pick a winner first.'); return; }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await fetch('/api/predictions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fan_id: _fan.id, match_no: matchNo,
+        predicted_winner: winner,
+        predicted_home_score: isNaN(hs) ? null : hs,
+        predicted_away_score: isNaN(as_) ? null : as_,
+        predicted_scorer: scorer,
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Failed');
+    _preds[matchNo] = d.prediction;
+    btn.textContent = '✓ Saved';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Update'; }, 1500);
+    const saved = document.getElementById(`saved-${matchNo}`);
+    if (saved) saved.style.display = 'block';
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Save';
+    alert('Could not save: ' + e.message);
+  }
+}
+
+// ── Cast vote ──
+async function castVote(pollId, optionId, btn) {
+  if (!_fan) { alert('Join the fan challenge first to vote.'); return; }
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fan_id: _fan.id, poll_id: pollId, option_id: optionId }),
+    });
+    const d = await r.json();
+    if (!r.ok && r.status !== 409) throw new Error(d.error || 'Failed');
+    await loadVoteData();
+    renderVoteSection(document.getElementById('vote-section'));
+  } catch (e) {
+    btn.disabled = false;
+    alert('Could not vote: ' + e.message);
+  }
+}
+
+// ── Render predict pane ──
+function renderPredictPane() {
+  const pane = document.getElementById('pane-predict');
+  if (!pane) return;
+
+  if (!_fan) {
+    pane.innerHTML = `
+      <div class="fan-gate">
+        <div style="font-size:32px;margin-bottom:12px;">⚽</div>
+        <h2>Join the Fan Challenge</h2>
+        <p>Predict match outcomes, score exact results, and climb the leaderboard. Top fans win prizes at the end of the season.</p>
+        <div class="field"><label>Your Name</label><input type="text" id="reg-name" placeholder="e.g. Priya Sharma"></div>
+        <div class="field"><label>Phone Number</label><input type="tel" id="reg-phone" placeholder="+91 98765 43210"></div>
+        <button class="btn-green" id="reg-btn" onclick="registerFan()">Join Now — It's Free</button>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px;">Your phone is only used to identify you on the leaderboard.</p>
+      </div>`;
+    return;
+  }
+
+  const totalPts = Object.values(_preds).reduce((s, p) => s + (p.points_winner || 0) + (p.points_score || 0) + (p.points_scorer || 0), 0);
+  const blocks   = _data?.blocks || [];
+
+  let cards = '';
+  for (const b of blocks) {
+    const upcoming = b.matches.filter(m => m.hs === null);
+    const played   = b.matches.filter(m => m.hs !== null);
+    if (!upcoming.length && !played.length) continue;
+
+    cards += `<div class="predict-block-lbl">
+      <span style="background:rgba(163,230,53,.12);color:var(--green);border-radius:5px;padding:3px 8px;font-size:11px;">${b.label}</span>
+      ${b.start && b.end ? fmtDate(b.start) + ' – ' + fmtDate(b.end) : ''}
+    </div>`;
+
+    // Upcoming — editable
+    for (const m of upcoming) {
+      const p = _preds[m.no];
+      cards += `<div class="predict-card">
+        <div class="pred-matchup">
+          <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
+          <div class="pred-vs">vs</div>
+          <div><div class="pred-team">${m.away}</div></div>
+        </div>
+        <div class="pred-body">
+          <div>
+            <div class="pred-lbl">Who wins?</div>
+            <div class="winner-opts">
+              ${['home','draw','away'].map((v, i) => {
+                const lbl = i === 0 ? abbr(m.home) : i === 2 ? abbr(m.away) : 'Draw';
+                return `<div class="winner-opt">
+                  <input type="radio" name="winner-${m.no}" id="w-${m.no}-${v}" value="${v}"${p?.predicted_winner === v ? ' checked' : ''}>
+                  <label for="w-${m.no}-${v}">${lbl}</label>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+          <div>
+            <div class="pred-lbl">Predict the score</div>
+            <div class="score-inputs">
+              <input type="number" id="hs-${m.no}" min="0" max="20" value="${p?.predicted_home_score ?? ''}" placeholder="0">
+              <span>–</span>
+              <input type="number" id="as-${m.no}" min="0" max="20" value="${p?.predicted_away_score ?? ''}" placeholder="0">
+            </div>
+            <div class="pred-hint">Exact score = +5 pts · Correct winner = +2 pts</div>
+          </div>
+          <div>
+            <div class="pred-lbl">Who scores? <span style="font-weight:400;">(optional)</span></div>
+            <input class="scorer-input" type="text" id="scorer-${m.no}" placeholder="Player name" value="${p?.predicted_scorer || ''}">
+            <div class="pred-hint">Correct pick = +3 pts</div>
+          </div>
+        </div>
+        <div class="pred-footer">
+          <span class="pred-saved" id="saved-${m.no}" style="display:${p ? 'block' : 'none'}">✓ Saved</span>
+          <span></span>
+          <button class="btn-save" onclick="savePrediction(${m.no}, this)">${p ? 'Update' : 'Save'}</button>
+        </div>
+      </div>`;
+    }
+
+    // Played — locked, show result vs prediction
+    for (const m of played) {
+      const p = _preds[m.no];
+      const actualWinner = m.hs > m.as ? 'home' : m.hs < m.as ? 'away' : 'draw';
+      const pts = (p?.points_winner || 0) + (p?.points_score || 0) + (p?.points_scorer || 0);
+      cards += `<div class="predict-card locked">
+        <div class="pred-matchup">
+          <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
+          <div class="pred-vs">${m.hs} – ${m.as}</div>
+          <div><div class="pred-team">${m.away}</div></div>
+        </div>
+        ${p ? `<div class="pred-result-row">
+          <span class="pred-result-actual">Your pick: ${p.predicted_winner === 'home' ? abbr(m.home) : p.predicted_winner === 'away' ? abbr(m.away) : 'Draw'}
+            ${p.predicted_home_score !== null ? ` · ${p.predicted_home_score}–${p.predicted_away_score}` : ''}
+            ${p.predicted_scorer ? ` · ${p.predicted_scorer}` : ''}
+          </span>
+          <span class="pred-result-pts">${pts > 0 ? '+' + pts + ' pts' : p.scored_at ? '0 pts' : 'Pending'}</span>
+        </div>` : `<div class="pred-locked-msg">🔒 No prediction submitted for this match</div>`}
+      </div>`;
+    }
+  }
+
+  pane.innerHTML = `
+    <div class="fan-bar">
+      <div>
+        <div class="fan-bar-name">Hey, ${_fan.name}! 👋</div>
+        <div class="fan-bar-sub">Predict outcomes · Climb the leaderboard</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="text-align:right;">
+          <div class="fan-pts-big">${totalPts}</div>
+          <div class="fan-pts-lbl">points</div>
+        </div>
+        <button class="btn-logout" onclick="clearFan();renderPredictPane();">Log out</button>
+      </div>
+    </div>
+    ${cards || '<p class="msg">No fixtures to predict yet.</p>'}
+    <div style="margin-top:32px;" id="vote-section"></div>`;
+
+  renderVoteSection(document.getElementById('vote-section'));
+}
+
+// ── Render vote section ──
+function renderVoteSection(el) {
+  if (!el) return;
+  if (!_voteData || !_voteData.poll) {
+    el.innerHTML = `<div class="sec-title" style="margin-top:8px;">Goal of the Block</div><div class="no-poll">No active poll yet — check back after the first block.</div>`;
+    return;
+  }
+  const { poll, options, total_votes, my_vote } = _voteData;
+  const optCards = options.map(o => `
+    <div class="vote-opt${my_vote === o.id ? ' my-vote' : ''}">
+      <div class="vote-opt-title">${o.label}</div>
+      <div class="vote-opt-meta">${o.team_name || ''} · ${o.match_ref || ''}</div>
+      <div class="vote-bar"><div class="vote-bar-fill" style="width:${o.pct}%"></div></div>
+      <div class="vote-count">${o.votes} vote${o.votes !== 1 ? 's' : ''} · ${o.pct}%</div>
+      <button class="btn-vote${my_vote === o.id ? ' voted' : ''}"
+        ${my_vote ? 'disabled' : `onclick="castVote('${poll.id}','${o.id}',this)"`}>
+        ${my_vote === o.id ? '✓ Your vote' : my_vote ? 'Voted' : 'Vote for this goal'}
+      </button>
+    </div>`).join('');
+  el.innerHTML = `
+    <div class="sec-title">Goal of the Block — Cast Your Vote</div>
+    <div class="poll-card">
+      <div class="poll-title">${poll.title}</div>
+      <div class="poll-meta">${total_votes} vote${total_votes !== 1 ? 's' : ''} · Closes ${fmtDate(poll.closes_at)}</div>
+      <div class="vote-grid">${optCards || '<p style="color:var(--muted);">No options added yet.</p>'}</div>
+    </div>`;
+}
+
+// ── Leaderboard ──
+async function renderLeaderboardPane() {
+  const pane = document.getElementById('pane-leaderboard');
+  if (!pane) return;
+  pane.innerHTML = '<div class="msg">Loading…</div>';
+  try {
+    const d = await fetch('/api/leaderboard').then(r => r.json());
+    _lb = d.leaderboard || [];
+    if (!_lb.length) {
+      pane.innerHTML = '<div class="lb-table"><div class="lb-empty">No predictions scored yet — check back after the first block.</div></div>';
+      return;
+    }
+    const posClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    pane.innerHTML = `
+      <div class="sec-title">Fan Leaderboard</div>
+      <div class="lb-table">
+        ${_lb.map((f, i) => `
+          <div class="lb-row${_fan && f.id === _fan.id ? ' me' : ''}">
+            <div class="lb-pos ${posClass(i)}">${i + 1}</div>
+            <div>
+              <div class="lb-name">${f.name}${_fan && f.id === _fan.id ? ' <span style="font-size:10px;font-weight:700;background:rgba(163,230,53,.15);color:var(--green);border-radius:4px;padding:2px 6px;">You</span>' : ''}</div>
+              <div class="lb-sub">${f.predictions_made} prediction${f.predictions_made !== 1 ? 's' : ''}</div>
+            </div>
+            <div class="lb-pts">${f.total_pts}</div>
+          </div>`).join('')}
+      </div>`;
+  } catch (e) {
+    pane.innerHTML = `<div class="msg err">Couldn't load leaderboard: ${e.message}</div>`;
+  }
+}
+
+// ── Main load ──
 async function load() {
   try {
     const res  = await fetch('/api/ladder');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    _data = await res.json();
+    if (_data.error) throw new Error(_data.error);
 
-    if (data.updated) {
-      const t = new Date(data.updated);
+    if (_data.updated) {
+      const t = new Date(_data.updated);
       document.getElementById('ts').textContent =
         'Updated ' + t.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
@@ -286,17 +658,25 @@ async function load() {
     document.getElementById('app').innerHTML = `
       <div class="tab-pane active" id="pane-table">
         <div class="sec-title">Points Table</div>
-        ${renderStandings(data.standings)}
+        ${renderStandings(_data.standings)}
         <div class="sec-title" style="margin-top:36px;">Top Scorers</div>
-        ${renderScorers(data.scorers)}
+        ${renderScorers(_data.scorers)}
       </div>
       <div class="tab-pane" id="pane-fixtures">
         <div class="sec-title">Fixtures &amp; Results</div>
-        ${renderFixtures(data.blocks)}
-      </div>`;
+        ${renderFixtures(_data.blocks)}
+      </div>
+      <div class="tab-pane" id="pane-predict"></div>
+      <div class="tab-pane" id="pane-leaderboard"></div>`;
 
-    // Restore active tab after re-render
-    switchTab(_activeTab, document.querySelector(`.tab-btn.active`));
+    switchTab(_activeTab, document.querySelector('.tab-btn.active'));
+
+    if (_fan) {
+      await loadFanData();
+      if (_activeTab === 'predict') renderPredictPane();
+    } else {
+      await loadVoteData();
+    }
   } catch (e) {
     document.getElementById('app').innerHTML =
       `<div class="msg err">Couldn't load data: ${e.message}</div>`;
