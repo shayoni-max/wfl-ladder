@@ -1,5 +1,5 @@
-const SB  = process.env.SUPABASE_URL;
-const KEY = process.env.SUPABASE_ANON_KEY;
+const SB  = process.env.SUPABASE_URL?.trim();
+const KEY = process.env.SUPABASE_ANON_KEY?.trim();
 
 async function sb(path, opts = {}) {
   const r = await fetch(`${SB}/rest/v1/${path}`, {
