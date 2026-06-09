@@ -31,6 +31,7 @@ export default async function handler(req, res) {
       'Fixtures_Revised!A1:J60',
       'Points Table!A1:N35',
       'Player Stats!A1:E100',
+      'Teams Master!A1:G150',
     ]);
 
     // Standings — rows 3-8 in the sheet (index 2-7)
@@ -103,11 +104,31 @@ export default async function handler(req, res) {
     }
     scorers.sort((a, b) => b.goals - a.goals || b.assists - a.assists);
 
-    // Per-team roster map for prediction dropdowns
+    // Build rosters from Teams Master tab
+    // Structure: team-header row ("Team Name: X | ..."), col-header row (skip), then player rows (col B = Full Name)
+    const rawRosters = {};
+    let _curTeam = null, _skipNext = false;
+    for (const r of (data['Teams Master'] || [])) {
+      const c0 = (r?.[0] || '').trim();
+      const c1 = (r?.[1] || '').trim();
+      const hdr = c0.startsWith('Team Name:') ? c0 : c1.startsWith('Team Name:') ? c1 : null;
+      if (hdr) {
+        _curTeam = hdr.split('|')[0].replace('Team Name:', '').trim();
+        rawRosters[_curTeam] = [];
+        _skipNext = true;
+        continue;
+      }
+      if (_skipNext) { _skipNext = false; continue; }
+      if (_curTeam && c1 && c1 !== 'Full Name') rawRosters[_curTeam].push(c1);
+    }
+
+    // Re-key using exact fixture team names so frontend lookups work (handles "WADDLERS" vs "WADDLERS FC" etc.)
     const rosters = {};
-    for (const s of scorers) {
-      if (!rosters[s.team]) rosters[s.team] = [];
-      rosters[s.team].push(s.name);
+    const fixtureTeams = new Set(Object.values(blocks).flatMap(b => b.matches.flatMap(m => [m.home, m.away])));
+    for (const ft of fixtureTeams) {
+      for (const [rt, players] of Object.entries(rawRosters)) {
+        if (norm(rt) === norm(ft)) { rosters[ft] = players; break; }
+      }
     }
 
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
