@@ -22,11 +22,6 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Debug: surface config
-  if (req.method === 'GET' && req.url?.includes('_debug')) {
-    return res.json({ sb_url: SB, has_key: !!KEY, url_test: `${SB}/rest/v1/fans` });
-  }
-
   if (req.method === 'POST') {
     const { name, phone } = req.body || {};
     if (!name?.trim() || !phone?.trim())
@@ -41,7 +36,7 @@ export default async function handler(req, res) {
       method: 'POST',
       body: JSON.stringify({ name: name.trim(), phone: phone.trim() }),
     });
-    if (!created.ok) return res.status(400).json({ error: 'Could not register. Try again.', _debug: created.data });
+    if (!created.ok) return res.status(400).json({ error: 'Could not register. Try again.' });
     return res.json({ fan: created.data[0], isNew: true });
   }
 
