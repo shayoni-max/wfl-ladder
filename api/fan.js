@@ -22,6 +22,11 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  // Debug: surface config
+  if (req.method === 'GET' && req.url?.includes('_debug')) {
+    return res.json({ sb_url: SB, has_key: !!KEY, url_test: `${SB}/rest/v1/fans` });
+  }
+
   if (req.method === 'POST') {
     const { name, phone } = req.body || {};
     if (!name?.trim() || !phone?.trim())
