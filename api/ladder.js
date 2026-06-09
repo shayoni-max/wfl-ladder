@@ -17,7 +17,7 @@ async function batchGet(ranges) {
 }
 
 function norm(s) {
-  return (s || '').toLowerCase().replace(/\bfc\b/g, '').replace(/\s+/g, ' ').trim();
+  return (s || '').toLowerCase().replace(/\bfc\b/g, '').replace(/\bfary\b/g, 'fari').replace(/\s+/g, ' ').trim();
 }
 
 function num(v) {
