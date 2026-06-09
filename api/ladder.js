@@ -31,7 +31,7 @@ export default async function handler(req, res) {
       'Fixtures_Revised!A1:J60',
       'Points Table!A1:N35',
       'Player Stats!A1:E100',
-      'Teams Master!A1:G150',
+      'Teams Master!A1:G89',
     ]);
 
     // Standings — rows 3-8 in the sheet (index 2-7)
