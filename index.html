@@ -126,6 +126,12 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .score-inputs span { color: var(--muted); font-weight: 700; }
 .scorer-input { width: 100%; background: #13161c; border: 1px solid var(--border2); border-radius: 7px; padding: 9px 12px; color: var(--text); font-size: 13px; outline: none; }
 .scorer-input:focus { border-color: var(--green); }
+select.scorer-input { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+select.scorer-input option, select.scorer-input optgroup { background: #13161c; color: var(--text); }
+.round-nav { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.round-pill { background: var(--card); border: 1px solid var(--border2); border-radius: 20px; color: var(--muted); font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; transition: all .15s; }
+.round-pill:hover { color: var(--text); border-color: #555; }
+.round-pill.active { background: rgba(163,230,53,.12); border-color: var(--green); color: var(--green); }
 .pred-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
 .pred-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--border); }
 .pred-saved { font-size: 12px; color: var(--green); font-weight: 700; }
@@ -258,12 +264,15 @@ function fmtKickoff(match) {
 }
 
 // ── State ──
-let _activeTab = 'table';
-let _data      = null;   // ladder data
-let _fan       = JSON.parse(localStorage.getItem('wfl_fan') || 'null');
-let _preds     = {};     // match_no → prediction
-let _voteData  = null;
-let _lb        = [];
+let _activeTab   = 'table';
+let _data        = null;   // ladder data
+let _fan         = JSON.parse(localStorage.getItem('wfl_fan') || 'null');
+let _preds       = {};     // match_no → prediction
+let _voteData    = null;
+let _lb          = [];
+let _activeRound = 0;      // index into _data.blocks
+
+function setRound(idx) { _activeRound = idx; renderPredictPane(); }
 
 function saveFanLocal(fan) { _fan = fan; localStorage.setItem('wfl_fan', JSON.stringify(fan)); }
 function clearFan()        { _fan = null; localStorage.removeItem('wfl_fan'); }
@@ -508,109 +517,139 @@ function renderPredictPane() {
 
   const totalPts = Object.values(_preds).reduce((s, p) => s + (p.points_winner || 0) + (p.points_score || 0) + (p.points_scorer || 0), 0);
   const blocks   = _data?.blocks || [];
+  const rosters  = _data?.rosters || {};
+
+  if (!blocks.length) {
+    pane.innerHTML = `<div class="fan-bar"><div><div class="fan-bar-name">Hey, ${_fan.name}!</div></div><button class="btn-logout" onclick="clearFan();renderPredictPane();">Log out</button></div><p class="msg">No fixtures to predict yet.</p>`;
+    return;
+  }
+
+  // ── Round selector ──
+  const roundNav = `<div class="round-nav">
+    ${blocks.map((b, idx) => {
+      const allPlayed  = b.matches.every(m => m.hs !== null);
+      const hasUpcoming = b.matches.some(m => m.hs === null && !isPredLocked(m));
+      const dot = hasUpcoming ? ' 🟢' : '';
+      return `<button class="round-pill${idx === _activeRound ? ' active' : ''}" onclick="setRound(${idx})">${b.label}${dot}</button>`;
+    }).join('')}
+  </div>`;
+
+  // ── Active round cards ──
+  const b = blocks[_activeRound];
+  const played     = b.matches.filter(m => m.hs !== null);
+  const timeLocked = b.matches.filter(m => m.hs === null && isPredLocked(m));
+  const upcoming   = b.matches.filter(m => m.hs === null && !isPredLocked(m));
+
+  // Helper: player dropdown for a match
+  function scorerSelect(matchNo, home, away, savedVal) {
+    const homePlayers = rosters[home] || [];
+    const awayPlayers = rosters[away] || [];
+    const allPlayers  = [...homePlayers, ...awayPlayers];
+    if (!allPlayers.length) {
+      // Fallback to text input if no roster data yet
+      return `<input class="scorer-input" type="text" id="scorer-${matchNo}" placeholder="Player name" value="${savedVal || ''}">`;
+    }
+    const homeOpts = homePlayers.map(n => `<option value="${n}"${savedVal === n ? ' selected' : ''}>${n}</option>`).join('');
+    const awayOpts = awayPlayers.map(n => `<option value="${n}"${savedVal === n ? ' selected' : ''}>${n}</option>`).join('');
+    return `<select class="scorer-input" id="scorer-${matchNo}">
+      <option value="">-- Pick a player (optional) --</option>
+      ${homeOpts ? `<optgroup label="${home}">${homeOpts}</optgroup>` : ''}
+      ${awayOpts ? `<optgroup label="${away}">${awayOpts}</optgroup>` : ''}
+    </select>`;
+  }
 
   let cards = '';
-  for (const b of blocks) {
-    const played   = b.matches.filter(m => m.hs !== null);
-    const timeLocked = b.matches.filter(m => m.hs === null && isPredLocked(m));
-    const upcoming = b.matches.filter(m => m.hs === null && !isPredLocked(m));
-    if (!upcoming.length && !timeLocked.length && !played.length) continue;
 
-    cards += `<div class="predict-block-lbl">
-      <span style="background:rgba(163,230,53,.12);color:var(--green);border-radius:5px;padding:3px 8px;font-size:11px;">${b.label}</span>
-      ${b.start && b.end ? fmtDate(b.start) + ' – ' + fmtDate(b.end) : ''}
+  // Upcoming — editable
+  for (const m of upcoming) {
+    const p = _preds[m.no];
+    const kickoffStr = fmtKickoff(m);
+    cards += `<div class="predict-card">
+      <div class="pred-matchup">
+        <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
+        <div class="pred-vs">vs</div>
+        <div><div class="pred-team">${m.away}</div></div>
+      </div>
+      <div class="pred-body">
+        <div>
+          <div class="pred-lbl">Who wins?</div>
+          <div class="winner-opts">
+            ${['home','draw','away'].map((v, i) => {
+              const lbl = i === 0 ? abbr(m.home) : i === 2 ? abbr(m.away) : 'Draw';
+              return `<div class="winner-opt">
+                <input type="radio" name="winner-${m.no}" id="w-${m.no}-${v}" value="${v}"${p?.predicted_winner === v ? ' checked' : ''}>
+                <label for="w-${m.no}-${v}">${lbl}</label>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="pred-lbl">Predict the score</div>
+          <div class="score-inputs">
+            <input type="number" id="hs-${m.no}" min="0" max="20" value="${p?.predicted_home_score ?? ''}" placeholder="0">
+            <span>–</span>
+            <input type="number" id="as-${m.no}" min="0" max="20" value="${p?.predicted_away_score ?? ''}" placeholder="0">
+          </div>
+          <div class="pred-hint">Exact score = +5 pts · Correct winner = +2 pts</div>
+        </div>
+        <div>
+          <div class="pred-lbl">Top scorer this game <span style="font-weight:400;">(optional)</span></div>
+          ${scorerSelect(m.no, m.home, m.away, p?.predicted_scorer || '')}
+          <div class="pred-hint">Most goals scored in this match = +3 pts</div>
+        </div>
+      </div>
+      <div class="pred-footer">
+        <span style="font-size:11px;color:var(--muted);">${kickoffStr ? '🕐 Closes ' + kickoffStr : 'Predictions open'}</span>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="pred-saved" id="saved-${m.no}" style="display:${p ? 'inline' : 'none'}">✓ Saved</span>
+          <button class="btn-save" onclick="savePrediction(${m.no}, this)">${p ? 'Update' : 'Save'}</button>
+        </div>
+      </div>
     </div>`;
-
-    // Upcoming — editable
-    for (const m of upcoming) {
-      const p = _preds[m.no];
-      const kickoffStr = fmtKickoff(m);
-      cards += `<div class="predict-card">
-        <div class="pred-matchup">
-          <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
-          <div class="pred-vs">vs</div>
-          <div><div class="pred-team">${m.away}</div></div>
-        </div>
-        <div class="pred-body">
-          <div>
-            <div class="pred-lbl">Who wins?</div>
-            <div class="winner-opts">
-              ${['home','draw','away'].map((v, i) => {
-                const lbl = i === 0 ? abbr(m.home) : i === 2 ? abbr(m.away) : 'Draw';
-                return `<div class="winner-opt">
-                  <input type="radio" name="winner-${m.no}" id="w-${m.no}-${v}" value="${v}"${p?.predicted_winner === v ? ' checked' : ''}>
-                  <label for="w-${m.no}-${v}">${lbl}</label>
-                </div>`;
-              }).join('')}
-            </div>
-          </div>
-          <div>
-            <div class="pred-lbl">Predict the score</div>
-            <div class="score-inputs">
-              <input type="number" id="hs-${m.no}" min="0" max="20" value="${p?.predicted_home_score ?? ''}" placeholder="0">
-              <span>–</span>
-              <input type="number" id="as-${m.no}" min="0" max="20" value="${p?.predicted_away_score ?? ''}" placeholder="0">
-            </div>
-            <div class="pred-hint">Exact score = +5 pts · Correct winner = +2 pts</div>
-          </div>
-          <div>
-            <div class="pred-lbl">Who scores? <span style="font-weight:400;">(optional)</span></div>
-            <input class="scorer-input" type="text" id="scorer-${m.no}" placeholder="Player name" value="${p?.predicted_scorer || ''}">
-            <div class="pred-hint">Correct pick = +3 pts</div>
-          </div>
-        </div>
-        <div class="pred-footer">
-          <span style="font-size:11px;color:var(--muted);">${kickoffStr ? '🕐 Closes ' + kickoffStr : 'Predictions open'}</span>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <span class="pred-saved" id="saved-${m.no}" style="display:${p ? 'inline' : 'none'}">✓ Saved</span>
-            <button class="btn-save" onclick="savePrediction(${m.no}, this)">${p ? 'Update' : 'Save'}</button>
-          </div>
-        </div>
-      </div>`;
-    }
-
-    // Time-locked — predictions closed, result not yet entered
-    for (const m of timeLocked) {
-      const p = _preds[m.no];
-      const kickoffStr = fmtKickoff(m);
-      cards += `<div class="predict-card locked">
-        <div class="pred-matchup">
-          <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
-          <div class="pred-vs">vs</div>
-          <div><div class="pred-team">${m.away}</div></div>
-        </div>
-        <div class="pred-locked-msg">🔒 Predictions closed${kickoffStr ? ' — kickoff ' + kickoffStr : ''}
-          ${p ? `<br><span style="color:var(--muted);font-size:11px;">Your pick: ${p.predicted_winner === 'home' ? abbr(m.home) : p.predicted_winner === 'away' ? abbr(m.away) : 'Draw'}${p.predicted_home_score !== null ? ' · ' + p.predicted_home_score + '–' + p.predicted_away_score : ''}${p.predicted_scorer ? ' · ' + p.predicted_scorer : ''}</span>` : '<br><span style="color:var(--muted);font-size:11px;">No prediction submitted</span>'}
-        </div>
-      </div>`;
-    }
-
-    // Played — locked, show result vs prediction
-    for (const m of played) {
-      const p = _preds[m.no];
-      const actualWinner = m.hs > m.as ? 'home' : m.hs < m.as ? 'away' : 'draw';
-      const pts = (p?.points_winner || 0) + (p?.points_score || 0) + (p?.points_scorer || 0);
-      cards += `<div class="predict-card locked">
-        <div class="pred-matchup">
-          <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
-          <div class="pred-vs">${m.hs} – ${m.as}</div>
-          <div><div class="pred-team">${m.away}</div></div>
-        </div>
-        ${p ? `<div class="pred-result-row">
-          <span class="pred-result-actual">Your pick: ${p.predicted_winner === 'home' ? abbr(m.home) : p.predicted_winner === 'away' ? abbr(m.away) : 'Draw'}
-            ${p.predicted_home_score !== null ? ` · ${p.predicted_home_score}–${p.predicted_away_score}` : ''}
-            ${p.predicted_scorer ? ` · ${p.predicted_scorer}` : ''}
-          </span>
-          <span class="pred-result-pts">${pts > 0 ? '+' + pts + ' pts' : p.scored_at ? '0 pts' : 'Pending'}</span>
-        </div>` : `<div class="pred-locked-msg">🔒 No prediction submitted for this match</div>`}
-      </div>`;
-    }
   }
+
+  // Time-locked — predictions closed, result not yet entered
+  for (const m of timeLocked) {
+    const p = _preds[m.no];
+    const kickoffStr = fmtKickoff(m);
+    cards += `<div class="predict-card locked">
+      <div class="pred-matchup">
+        <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
+        <div class="pred-vs">vs</div>
+        <div><div class="pred-team">${m.away}</div></div>
+      </div>
+      <div class="pred-locked-msg">🔒 Predictions closed${kickoffStr ? ' — kickoff ' + kickoffStr : ''}
+        ${p ? `<br><span style="color:var(--muted);font-size:11px;">Your pick: ${p.predicted_winner === 'home' ? abbr(m.home) : p.predicted_winner === 'away' ? abbr(m.away) : 'Draw'}${p.predicted_home_score !== null ? ' · ' + p.predicted_home_score + '–' + p.predicted_away_score : ''}${p.predicted_scorer ? ' · ' + p.predicted_scorer : ''}</span>` : '<br><span style="color:var(--muted);font-size:11px;">No prediction submitted</span>'}
+      </div>
+    </div>`;
+  }
+
+  // Played — show result vs prediction + points
+  for (const m of played) {
+    const p = _preds[m.no];
+    const pts = (p?.points_winner || 0) + (p?.points_score || 0) + (p?.points_scorer || 0);
+    cards += `<div class="predict-card locked">
+      <div class="pred-matchup">
+        <div style="text-align:right;"><div class="pred-team pred-home">${m.home}</div></div>
+        <div class="pred-vs">${m.hs} – ${m.as}</div>
+        <div><div class="pred-team">${m.away}</div></div>
+      </div>
+      ${p ? `<div class="pred-result-row">
+        <span class="pred-result-actual">Your pick: ${p.predicted_winner === 'home' ? abbr(m.home) : p.predicted_winner === 'away' ? abbr(m.away) : 'Draw'}
+          ${p.predicted_home_score !== null ? ` · ${p.predicted_home_score}–${p.predicted_away_score}` : ''}
+          ${p.predicted_scorer ? ` · ${p.predicted_scorer}` : ''}
+        </span>
+        <span class="pred-result-pts">${pts > 0 ? '+' + pts + ' pts' : p.scored_at ? '0 pts' : 'Pending'}</span>
+      </div>` : `<div class="pred-locked-msg">🔒 No prediction submitted for this match</div>`}
+    </div>`;
+  }
+
+  if (!cards) cards = '<p class="msg" style="padding:24px 0;">No matches in this round yet.</p>';
 
   pane.innerHTML = `
     <div class="fan-bar">
       <div>
-        <div class="fan-bar-name">Hey, ${_fan.name}! 👋</div>
+        <div class="fan-bar-name">Hey, ${_fan.name}!</div>
         <div class="fan-bar-sub">Predict outcomes · Climb the leaderboard</div>
       </div>
       <div style="display:flex;align-items:center;gap:16px;">
@@ -621,7 +660,8 @@ function renderPredictPane() {
         <button class="btn-logout" onclick="clearFan();renderPredictPane();">Log out</button>
       </div>
     </div>
-    ${cards || '<p class="msg">No fixtures to predict yet.</p>'}
+    ${roundNav}
+    ${cards}
     <div style="margin-top:32px;" id="vote-section"></div>`;
 
   renderVoteSection(document.getElementById('vote-section'));
@@ -693,6 +733,12 @@ async function load() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     _data = await res.json();
     if (_data.error) throw new Error(_data.error);
+
+    // Default to first round that has upcoming matches; else last played round
+    if (_data.blocks?.length) {
+      const firstUpcoming = _data.blocks.findIndex(b => b.matches.some(m => m.hs === null && !isPredLocked(m)));
+      _activeRound = firstUpcoming >= 0 ? firstUpcoming : _data.blocks.length - 1;
+    }
 
     if (_data.updated) {
       const t = new Date(_data.updated);

@@ -103,9 +103,16 @@ export default async function handler(req, res) {
     }
     scorers.sort((a, b) => b.goals - a.goals || b.assists - a.assists);
 
+    // Per-team roster map for prediction dropdowns
+    const rosters = {};
+    for (const s of scorers) {
+      if (!rosters[s.team]) rosters[s.team] = [];
+      rosters[s.team].push(s.name);
+    }
+
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.json({ standings, blocks: Object.values(blocks), scorers, updated: new Date().toISOString() });
+    res.json({ standings, blocks: Object.values(blocks), scorers, rosters, updated: new Date().toISOString() });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
