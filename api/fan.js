@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       method: 'POST',
       body: JSON.stringify({ name: name.trim(), phone: phone.trim() }),
     });
-    if (!created.ok) return res.status(400).json({ error: 'Could not register. Try again.' });
+    if (!created.ok) return res.status(400).json({ error: 'Could not register. Try again.', _debug: created.data });
     return res.json({ fan: created.data[0], isNew: true });
   }
 
