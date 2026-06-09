@@ -110,9 +110,10 @@ export default async function handler(req, res) {
     const rawRosters = {};
     let _curTeam = null, _skipNext = false;
     for (const r of (data['Teams Master'] || [])) {
-      const hdrCell = (r || []).map(c => (c || '').trim()).find(c => c.startsWith('Team Name:'));
+      // "Team Name: X" and "Team Name : X" both exist in the sheet — match case-insensitively
+      const hdrCell = (r || []).map(c => (c || '').trim()).find(c => c.toLowerCase().startsWith('team name'));
       if (hdrCell) {
-        _curTeam = hdrCell.split('|')[0].replace('Team Name:', '').trim();
+        _curTeam = hdrCell.split('|')[0].replace(/team name\s*:\s*/i, '').replace(/[()]/g, '').trim();
         rawRosters[_curTeam] = [];
         _skipNext = true;
         continue;
@@ -133,7 +134,7 @@ export default async function handler(req, res) {
 
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.json({ standings, blocks: Object.values(blocks), scorers, rosters, _rawTeamsMaster: (data['Teams Master'] || []).slice(0, 80), updated: new Date().toISOString() });
+    res.json({ standings, blocks: Object.values(blocks), scorers, rosters, updated: new Date().toISOString() });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
