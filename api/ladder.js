@@ -133,7 +133,7 @@ export default async function handler(req, res) {
 
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.json({ standings, blocks: Object.values(blocks), scorers, rosters, updated: new Date().toISOString() });
+    res.json({ standings, blocks: Object.values(blocks), scorers, rosters, _rawTeamsMaster: (data['Teams Master'] || []).slice(0, 80), updated: new Date().toISOString() });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
