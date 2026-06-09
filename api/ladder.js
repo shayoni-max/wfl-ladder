@@ -105,21 +105,21 @@ export default async function handler(req, res) {
     scorers.sort((a, b) => b.goals - a.goals || b.assists - a.assists);
 
     // Build rosters from Teams Master tab
-    // Structure: team-header row ("Team Name: X | ..."), col-header row (skip), then player rows (col B = Full Name)
+    // Each team block: merged header row ("Team Name: X | ..."), col-header row (skip), then player rows (col B = Full Name)
+    // Scan every cell in each row for "Team Name:" — merged cells can land in any column
     const rawRosters = {};
     let _curTeam = null, _skipNext = false;
     for (const r of (data['Teams Master'] || [])) {
-      const c0 = (r?.[0] || '').trim();
-      const c1 = (r?.[1] || '').trim();
-      const hdr = c0.startsWith('Team Name:') ? c0 : c1.startsWith('Team Name:') ? c1 : null;
-      if (hdr) {
-        _curTeam = hdr.split('|')[0].replace('Team Name:', '').trim();
+      const hdrCell = (r || []).map(c => (c || '').trim()).find(c => c.startsWith('Team Name:'));
+      if (hdrCell) {
+        _curTeam = hdrCell.split('|')[0].replace('Team Name:', '').trim();
         rawRosters[_curTeam] = [];
         _skipNext = true;
         continue;
       }
       if (_skipNext) { _skipNext = false; continue; }
-      if (_curTeam && c1 && c1 !== 'Full Name') rawRosters[_curTeam].push(c1);
+      const name = (r?.[1] || '').trim();
+      if (_curTeam && name && name !== 'Full Name') rawRosters[_curTeam].push(name);
     }
 
     // Re-key using exact fixture team names so frontend lookups work (handles "WADDLERS" vs "WADDLERS FC" etc.)
