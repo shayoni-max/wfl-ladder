@@ -233,7 +233,7 @@ function fmtDate(raw) {
 }
 
 // ── Prediction lock config ──
-const PRED_LOCK_MINUTES = 30; // lock predictions this many minutes before kickoff
+const PRED_LOCK_MINUTES = 1; // lock predictions this many minutes before kickoff
 
 function kickoffDate(match) {
   if (!match.match_date || !match.start_time) return null;
