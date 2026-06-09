@@ -104,6 +104,23 @@ export default async function handler(req, res) {
     }
     scorers.sort((a, b) => b.goals - a.goals || b.assists - a.assists);
 
+    // Form guide — last 10 results per team (W/D/L), chronological order
+    const formMap = {};
+    const allMatches = Object.values(blocks).flatMap(b => b.matches).sort((a, b) => a.no - b.no);
+    for (const m of allMatches) {
+      if (m.hs === null) continue;
+      const homeR = m.hs > m.as ? 'W' : m.hs < m.as ? 'L' : 'D';
+      const awayR = m.hs > m.as ? 'L' : m.hs < m.as ? 'W' : 'D';
+      if (!formMap[m.home]) formMap[m.home] = [];
+      if (!formMap[m.away]) formMap[m.away] = [];
+      formMap[m.home].push(homeR);
+      formMap[m.away].push(awayR);
+    }
+    for (const s of standings) {
+      const key = formMap[s.name] ? s.name : Object.keys(formMap).find(k => norm(k) === norm(s.name));
+      s.form = key ? formMap[key].slice(-10) : [];
+    }
+
     // Build rosters from Teams Master tab
     // Each team block: merged header row ("Team Name: X | ..."), col-header row (skip), then player rows (col B = Full Name)
     // Scan every cell in each row for "Team Name:" — merged cells can land in any column

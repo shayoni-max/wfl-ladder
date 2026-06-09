@@ -128,6 +128,13 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .scorer-input:focus { border-color: var(--green); }
 select.scorer-input { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
 select.scorer-input option, select.scorer-input optgroup { background: #13161c; color: var(--text); }
+/* Form guide dots */
+.form-row { display: flex; gap: 3px; justify-content: center; }
+.form-dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; flex-shrink: 0; }
+.form-w { background: rgba(163,230,53,.85); color: #07080a; }
+.form-l { background: rgba(239,68,68,.75); color: #fff; }
+.form-d { background: rgba(251,191,36,.65); color: #07080a; }
+.form-empty { background: transparent; border: 1px solid #2a2d35; }
 .round-nav { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
 .round-pill { background: var(--card); border: 1px solid var(--border2); border-radius: 20px; color: var(--muted); font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; transition: all .15s; }
 .round-pill:hover { color: var(--text); border-color: #555; }
@@ -297,9 +304,17 @@ function renderStandings(data) {
       <th>#</th><th class="left">Club</th>
       <th>MP</th><th>W</th><th>D</th><th>L</th>
       <th class="hide-sm">GF</th><th class="hide-sm">GA</th><th class="hide-sm">GD</th>
-      <th>Pts</th>
+      <th>Pts</th><th class="hide-sm" style="min-width:230px;">Last 10</th>
     </tr></thead>
-    <tbody>${data.map((s, i) => `
+    <tbody>${data.map((s, i) => {
+      const formDots = Array.from({length: 10}, (_, j) => {
+        const r = (s.form || [])[j] || '';
+        if (r === 'W') return `<span class="form-dot form-w" title="Win">W</span>`;
+        if (r === 'L') return `<span class="form-dot form-l" title="Loss">L</span>`;
+        if (r === 'D') return `<span class="form-dot form-d" title="Draw">D</span>`;
+        return `<span class="form-dot form-empty"></span>`;
+      }).join('');
+      return `
       <tr class="${i === 0 ? 'leader' : ''}">
         <td style="color:var(--muted);font-size:11px;width:24px;">${i + 1}</td>
         <td class="left"><div class="club">
@@ -310,7 +325,9 @@ function renderStandings(data) {
         <td class="hide-sm">${s.gf}</td><td class="hide-sm">${s.ga}</td>
         <td class="hide-sm">${s.gd > 0 ? '+' + s.gd : s.gd}</td>
         <td class="pts">${s.pts}</td>
-      </tr>`).join('')}
+        <td class="hide-sm"><div class="form-row">${formDots}</div></td>
+      </tr>`;
+    }).join('')}
     </tbody></table>`;
 }
 
